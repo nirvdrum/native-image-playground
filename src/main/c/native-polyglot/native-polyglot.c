@@ -2,36 +2,9 @@
 #include <stdio.h>
 
 #include <polyglot_api.h>
+#include "polyglot_scripts.h"
 
 #define TO_POLY_DOUBLE(thread, context, value) ({ poly_value result = NULL; poly_create_double(thread, context, value, &result); result; })
-
-const char* JS_HAVERSTEIN_DISTANCE =
-  "const EARTH_RADIUS = 6371;\n"
-  "(a_lat, a_long, b_lat, b_long) => {\n"
-  "    const a_lat_radians = a_lat * Math.PI / 180;\n"
-  "    const a_long_radians = a_long * Math.PI / 180;\n"
-  "    const b_lat_radians = b_lat * Math.PI / 180;\n"
-  "    const b_long_radians = b_long * Math.PI / 180;\n"
-  "    const angular_distance = Math.acos(\n"
-  "        Math.sin(a_lat_radians) * Math.sin(b_lat_radians) +\n"
-  "        Math.cos(a_lat_radians) * Math.cos(b_lat_radians) *\n"
-  "        Math.cos(a_long_radians - b_long_radians));\n"
-  "    return EARTH_RADIUS * angular_distance;\n"
-  "}";
-
-const char* RUBY_HAVERSTEIN_DISTANCE =
-  "EARTH_RADIUS = 6371\n"
-  "->(a_lat, a_long, b_lat, b_long) do\n"
-  "    a_lat_radians = a_lat * Math::PI / 180\n"
-  "    a_long_radians = a_long * Math::PI / 180\n"
-  "    b_lat_radians = b_lat * Math::PI / 180\n"
-  "    b_long_radians = b_long * Math::PI / 180\n"
-  "    angular_distance = Math::acos(\n"
-  "        Math::sin(a_lat_radians) * Math::sin(b_lat_radians) +\n"
-  "        Math::cos(a_lat_radians) * Math::cos(b_lat_radians) *\n"
-  "        Math::cos(a_long_radians - b_long_radians))\n"
-  "    EARTH_RADIUS * angular_distance\n"
-  "end";
 
 int main(int argc, char **argv) {
   if (argc != 6) {
