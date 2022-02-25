@@ -2,9 +2,10 @@
 
 ## Prerequisites
 
-In order to build this project you will need to have both a [GraalVM distribution](https://graalvm.org/) and
-[Apache Maven](https://maven.apache.org/) installed. For those on Apple M1 hardware, you will have to run everything
-listed here in a Rosetta session. GraalVM does not currently support macOS M1 natively. Both can be installed with [SDKMan!](https://sdkman.io/):
+In order to build this project you will need to have clang and clang++ installed, along with a [GraalVM distribution](https://graalvm.org/)
+and [Apache Maven](https://maven.apache.org/). For those on Apple M1 hardware, you will have to run everything listed
+here in a Rosetta session. GraalVM does not currently support M1 natively. Both GraalVM and Maven can be installed with
+[SDKMan!](https://sdkman.io/):
 
 ```
 $ sdk install java 22.0.0.2.r17-grl
