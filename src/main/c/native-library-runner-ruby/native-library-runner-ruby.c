@@ -9,15 +9,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  graal_isolate_t *isolate = NULL;
-  graal_isolatethread_t *thread = NULL;
-
-  if (graal_create_isolate(NULL, &isolate, &thread) != 0) {
-    fprintf(stderr, "initialization error\n");
-    return 1;
-  }
-
-  graal_isolatethread_t *myThread = create_isolate();
+  graal_isolatethread_t *thread = create_isolate();
 
   double a_lat   = strtod(argv[1], NULL);
   double a_long  = strtod(argv[2], NULL);
@@ -27,5 +19,4 @@ int main(int argc, char** argv) {
   printf("%.2f km\n", distance_ruby(thread, a_lat, a_long, b_lat, b_long));
 
   graal_tear_down_isolate(thread);
-  graal_tear_down_isolate(myThread);
 }

@@ -17,8 +17,6 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  graal_isolatethread_t *myThread = create_isolate();
-
   double a_lat   = strtod(argv[1], NULL);
   double a_long  = strtod(argv[2], NULL);
   double b_lat   = strtod(argv[3], NULL);
@@ -27,5 +25,4 @@ int main(int argc, char** argv) {
   printf("%.2f km\n", distance(thread, a_lat, a_long, b_lat, b_long));
 
   graal_tear_down_isolate(thread);
-  graal_tear_down_isolate(myThread);
 }
