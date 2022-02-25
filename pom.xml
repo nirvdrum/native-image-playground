@@ -177,6 +177,8 @@
                                 <argument>-I${project.build.directory}</argument>
                                 <argument>-L${project.build.directory}</argument>
                                 <argument>-l${launcher.name}</argument>
+                                <argument>-Wl,-rpath</argument>
+                                <argument>${project.build.directory}</argument>
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>${project.build.sourceDirectory}/../c/${launcher.name}/${launcher.name}.c</argument>
                             </arguments>
@@ -240,6 +242,8 @@
                                 <argument>-I${project.build.directory}</argument>
                                 <argument>-L${project.build.directory}</argument>
                                 <argument>-l${launcher.name}</argument>
+                                <argument>-Wl,-rpath</argument>
+                                <argument>${project.build.directory}</argument>
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>${project.build.sourceDirectory}/../c/${launcher.name}/${launcher.name}.c</argument>
                             </arguments>
@@ -280,6 +284,8 @@
                                 <argument>-L${java.home}/lib/polyglot</argument>
                                 <argument>-Wl,-rpath</argument>
                                 <argument>${java.home}</argument>
+                                <argument>-Wl,-rpath</argument>
+                                <argument>${java.home}/lib/polyglot</argument>
                                 <argument>-lpolyglot</argument>
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>${project.build.sourceDirectory}/../c/${launcher.name}/${launcher.name}.c</argument>
@@ -395,6 +401,8 @@
                                 <argument>-L${java.home}/lib/server</argument>
                                 <argument>-Wl,-rpath</argument>
                                 <argument>${java.home}</argument>
+                                <argument>-Wl,-rpath</argument>
+                                <argument>${project.build.directory}</argument>
                                 <argument>-l${launcher.name}</argument>
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>-g</argument>
