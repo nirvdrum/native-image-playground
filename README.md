@@ -273,9 +273,9 @@ any Ruby code.
 
 ```
 $ mvn -P jni-libjvm-polyglot -D skipTests=true clean package
-$ ./target/jni-libjvm-polyglot-runner ruby 51.507222 -0.1275 40.7127 -74.0059
+$ ./target/jni-runner ruby 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
-$ ./target/jni-libjvm-polyglot-runner js 51.507222 -0.1275 40.7127 -74.0059
+$ ./target/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
 
@@ -291,8 +291,8 @@ any Ruby code.
 
 ```
 $ mvn -P jni-native -D skipTests=true clean package
-$ ./target/jni-libjvm-polyglot-runner ruby 51.507222 -0.1275 40.7127 -74.0059
+$ ./target/jni-runner ruby 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
-$ ./target/jni-libjvm-polyglot-runner js 51.507222 -0.1275 40.7127 -74.0059
+$ ./target/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
