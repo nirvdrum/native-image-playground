@@ -1,7 +1,7 @@
 package com.shopify.truffleruby;
 
 public class PolyglotScripts {
-    public static String getHaversteinRuby() {
+    public static String getHaversineRuby() {
         return """
                 EARTH_RADIUS = 6371
                             

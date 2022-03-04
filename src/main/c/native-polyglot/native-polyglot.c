@@ -21,13 +21,13 @@ int main(int argc, char **argv) {
   const char* code = NULL;
   switch (language[0]) {
     case 'j':
-      code = JS_HAVERSTEIN_DISTANCE;
+      code = JS_HAVERSINE_DISTANCE;
       break;
     case 'r':
-      code = RUBY_HAVERSTEIN_DISTANCE;
+      code = RUBY_HAVERSINE_DISTANCE;
       break;
     default:
-      fprintf(stderr, "Haverstein distance code is not provided for '%s'\n", language);
+      fprintf(stderr, "Haversine distance code is not provided for '%s'\n", language);
       exit(1);
   }
 
@@ -50,9 +50,9 @@ int main(int argc, char **argv) {
     goto exit_isolate;
   }
 
-  poly_value haverstein_distance_function = NULL;
+  poly_value haversine_distance_function = NULL;
 
-  if (poly_context_eval(thread, context, language, "eval", code, &haverstein_distance_function) != poly_ok) {
+  if (poly_context_eval(thread, context, language, "eval", code, &haversine_distance_function) != poly_ok) {
     fprintf(stderr, "poly_context_eval error\n");
 
     const poly_extended_error_info *error;
@@ -67,10 +67,10 @@ int main(int argc, char **argv) {
   }
 
   bool can_execute = false;
-  poly_value_can_execute(thread, haverstein_distance_function, &can_execute);
+  poly_value_can_execute(thread, haversine_distance_function, &can_execute);
 
   if (can_execute) {
-    poly_value haverstein_distance_args[] = {
+    poly_value haversine_distance_args[] = {
       TO_POLY_DOUBLE(thread, context, a_lat),
       TO_POLY_DOUBLE(thread, context, a_long),
       TO_POLY_DOUBLE(thread, context, b_lat),
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     };
 
     poly_value result = NULL;
-    if (poly_value_execute(thread, haverstein_distance_function, haverstein_distance_args, 4, &result) != poly_ok) {
+    if (poly_value_execute(thread, haversine_distance_function, haversine_distance_args, 4, &result) != poly_ok) {
       fprintf(stderr, "poly_value_execute error\n");
 
       const poly_extended_error_info *error;
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
     printf("%.2f km\n", distance);
   } else {
-    fprintf(stderr, "The Haverstein distance code block for '%s' is not executable. Did you return a function?\n", language);
+    fprintf(stderr, "The Haversine distance code block for '%s' is not executable. Did you return a function?\n", language);
     goto exit_scope;
   }
 
