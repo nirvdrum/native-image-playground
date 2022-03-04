@@ -92,6 +92,7 @@
         <profile>
             <id>native-image</id>
             <build>
+                <directory>${project.basedir}/target-native-image</directory>
                 <plugins>
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
@@ -129,6 +130,7 @@
                 <launcher.name>native-library-runner</launcher.name>
             </properties>
             <build>
+                <directory>${project.basedir}/target-native-library</directory>
                 <plugins>
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
@@ -194,6 +196,7 @@
                 <launcher.name>native-library-runner-ruby</launcher.name>
             </properties>
             <build>
+                <directory>${project.basedir}/target-native-library-ruby</directory>
                 <plugins>
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
@@ -259,6 +262,7 @@
                 <launcher.name>native-polyglot</launcher.name>
             </properties>
             <build>
+                <directory>${project.basedir}/target-native-polyglot</directory>
                 <plugins>
                     <plugin>
                         <artifactId>exec-maven-plugin</artifactId>
@@ -302,6 +306,7 @@
                 <launcher.name>jni-runner</launcher.name>
             </properties>
             <build>
+                <directory>${project.basedir}/target-jni-libjvm</directory>
                 <plugins>
                     <plugin>
                         <artifactId>exec-maven-plugin</artifactId>
@@ -345,6 +350,7 @@
                 <launcher.name>jni-runner</launcher.name>
             </properties>
             <build>
+                <directory>${project.basedir}/target-jni-native</directory>
                 <plugins>
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>

@@ -162,7 +162,7 @@ distance of two coordinates. All functionality is written in Java and is compile
 
 ```
 $ mvn -P native-image -D skipTests=true package
-$ ./target/native-image-playground 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-native-image/native-image-playground 51.507222 -0.1275 40.7127 -74.0059
 5570.248509 km
 ```
 
@@ -179,7 +179,7 @@ function. The resulting binary is named `native-library-runner`.
 
 ```
 $ mvn -P native-library -D skipTests=true clean package
-$ > ./target/native-library-runner 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-native-library/native-library-runner 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
 
@@ -192,7 +192,7 @@ dependency). TruffleRuby is invoked via Truffle's polyglot API in Java and the f
 
 ```
 $ mvn -P native-library-ruby -D skipTests=true clean package
-$ ./target/native-library-runner-ruby 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-native-library-ruby/native-library-runner-ruby 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
 
@@ -276,9 +276,9 @@ use as the first argument. Acceptable values are "js" and "ruby" (case-sensitive
 
 ```
 $ mvn -P native-polyglot -D skipTests=true clean package
-$ ./target/native-polyglot ruby 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-native-polyglot/native-polyglot ruby 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
-$ ./target/native-polyglot js 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-native-polyglot/native-polyglot js 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
 
@@ -293,9 +293,9 @@ out-of-the box.
 
 ```
 $ mvn -P jni-libjvm-polyglot -D skipTests=true clean package
-$ ./target/jni-runner ruby 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-jni-libjvm/jni-runner ruby 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
-$ ./target/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-jni-libjvm/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
 
@@ -316,8 +316,8 @@ in order for them to be linked into the library. If you haven't already done so,
 
 ```
 $ mvn -P jni-native -D skipTests=true clean package
-$ ./target/jni-runner ruby 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-jni-native/jni-runner ruby 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
-$ ./target/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
+$ ./target-jni-native/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
