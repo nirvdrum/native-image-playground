@@ -419,5 +419,81 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>benchmark</id>
+            <properties>
+                <launcher.name>benchmark-runner</launcher.name>
+            </properties>
+            <build>
+                <directory>${project.basedir}/target-benchmark</directory>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native.maven.plugin.version}</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                            <execution>
+                                <id>test-native</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>com.shopify.truffleruby.NativeLibraryRuby</mainClass>
+                            <imageName>lib${launcher.name}</imageName>
+                            <buildArgs>--shared --language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>Build Launcher</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>clang++</executable>
+                            <workingDirectory>${project.build.directory}</workingDirectory>
+                            <arguments>
+                                <argument>-I${project.build.sourceDirectory}/../c/includes</argument>
+                                <argument>-I${project.build.directory}</argument>
+                                <argument>-I${java.home}/include</argument>
+                                <argument>-I${java.home}/include/darwin</argument>
+                                <argument>-I${java.home}/include/linux</argument>
+                                <argument>-I${java.home}/lib/polyglot</argument>
+                                <argument>-L${project.build.directory}</argument>
+                                <argument>-L${java.home}/lib/polyglot</argument>
+                                <argument>-L${java.home}/lib/server</argument>
+                                <argument>-Wl,-rpath</argument>
+                                <argument>${java.home}</argument>
+                                <argument>-Wl,-rpath</argument>
+                                <argument>${project.build.directory}</argument>
+                                <argument>-l${launcher.name}</argument>
+                                <argument>-o${project.build.directory}/${launcher.name}</argument>
+                                <argument>-std=c++11</argument>
+                                <argument>${project.build.sourceDirectory}/../cxx/${launcher.name}/${launcher.name}.cxx</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>
