@@ -421,6 +421,36 @@
         </profile>
 
         <profile>
+            <id>benchmark-setup</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>Build Launcher</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>bash</executable>
+                            <workingDirectory>${project.build.directory}</workingDirectory>
+                            <arguments>
+                                <argument>${project.basedir}/build-google-benchmark.sh</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+
+        <profile>
             <id>benchmark</id>
             <properties>
                 <launcher.name>benchmark-runner</launcher.name>
@@ -452,7 +482,7 @@
                         <configuration>
                             <mainClass>com.shopify.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
-                            <buildArgs>--shared --language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
+                            <buildArgs>--shared -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -478,17 +508,23 @@
                                 <argument>-I${java.home}/include/darwin</argument>
                                 <argument>-I${java.home}/include/linux</argument>
                                 <argument>-I${java.home}/lib/polyglot</argument>
+                                <argument>-I${project.basedir}/target/benchmark/include</argument>
+                                <argument>-I${project.basedir}/target/benchmark/build/include</argument>
                                 <argument>-L${project.build.directory}</argument>
                                 <argument>-L${java.home}/lib/polyglot</argument>
                                 <argument>-L${java.home}/lib/server</argument>
+                                <argument>-L${project.basedir}/target/benchmark/build/src</argument>
                                 <argument>-Wl,-rpath</argument>
                                 <argument>${java.home}</argument>
                                 <argument>-Wl,-rpath</argument>
                                 <argument>${project.build.directory}</argument>
                                 <argument>-l${launcher.name}</argument>
+                                <argument>-lbenchmark</argument>
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>-std=c++11</argument>
+                                <argument>-o${launcher.name}</argument>
                                 <argument>${project.build.sourceDirectory}/../cxx/${launcher.name}/${launcher.name}.cxx</argument>
+                                <argument>-lbenchmark</argument>
                             </arguments>
                         </configuration>
                     </plugin>

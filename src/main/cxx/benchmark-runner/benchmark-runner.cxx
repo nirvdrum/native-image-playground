@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 
+#include <benchmark/benchmark.h>
 #include "polyglot_scripts.h"
 #include "libbenchmark-runner.h"
 
@@ -22,6 +23,59 @@ enum exec_mode {
   JNI_RUBY_DISTANCE,
   JNI_POLYGLOT_DISTANCE
 };
+
+BENCHMARK_MAIN();
+
+graal_isolatethread_t *isolate_thread;
+
+static void DoCEntrySetup(const benchmark::State& state) {
+  cout << "Setup\n";
+  if (NULL == isolate_thread) {
+    isolate_thread = create_isolate();
+  }
+  distance_ruby(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+  distance_polyglot(isolate_thread, (char *) "ruby", (char *) RUBY_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127, -74.0059);
+}
+
+static void DoCEntryTeardown(const benchmark::State& state) {
+  //cout << "Teardown\n";
+  //tear_down_isolate(isolate_thread);
+}
+
+static void BM_CEntryJavaDistance(benchmark::State& state) {
+  for (auto _ : state) {
+    distance(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+  }
+}
+
+static void BM_CEntryRubyDistance(benchmark::State& state) {
+  distance_ruby(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+
+  for (auto _ : state) {
+    distance_ruby(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+  }
+}
+
+static void BM_CEntryPolyglotRubyDistance(benchmark::State& state) {
+  //distance_polyglot(isolate_thread, (char *) "ruby", (char *) RUBY_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127, -74.0059);
+
+  for (auto _ : state) {
+    distance_polyglot(isolate_thread, (char *) "ruby", (char *) RUBY_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127, -74.0059);
+  }
+}
+
+static void BM_CEntryPolyglotJsDistance(benchmark::State& state) {
+  //distance_polyglot(isolate_thread, (char *) "js", (char *) JS_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127, -74.0059);
+
+  for (auto _ : state) {
+    distance_polyglot(isolate_thread, (char *) "js", (char *) JS_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127, -74.0059);
+  }
+}
+
+BENCHMARK(BM_CEntryJavaDistance)->Setup(DoCEntrySetup)->Teardown(DoCEntryTeardown);
+BENCHMARK(BM_CEntryRubyDistance)->MinTime(30.0)->Setup(DoCEntrySetup)->Teardown(DoCEntryTeardown);
+BENCHMARK(BM_CEntryPolyglotRubyDistance)->MinTime(30.0)->Setup(DoCEntrySetup)->Teardown(DoCEntryTeardown);
+BENCHMARK(BM_CEntryPolyglotJsDistance)->MinTime(30.0)->Setup(DoCEntrySetup)->Teardown(DoCEntryTeardown);
 
 void centry_function(exec_mode mode, const char* language, const char* code, double a_lat, double a_long, double b_lat, double b_long) {
   graal_isolatethread_t *thread = create_isolate();
@@ -159,7 +213,7 @@ void jni_function(exec_mode mode, const char* language, const char* code, double
   jvm->DestroyJavaVM();
 }
 
-int main(int argc, char** argv) {
+int main2(int argc, char** argv) {
   if (argc != 7) {
     fprintf(stderr, "Usage: %s <exec_mode> <language>[js|ruby] <lat1> <long1> <lat2> <long2>\n", argv[0]);
     exit(1);

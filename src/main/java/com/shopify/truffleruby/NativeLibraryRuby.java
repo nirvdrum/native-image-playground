@@ -20,6 +20,9 @@ public class NativeLibraryRuby {
                 .build()) {
             final Value haversineDistance = context.eval("ruby", PolyglotScripts.getHaversineRuby());
 
+            for (int i = 0; i < 10000000; i++) {
+                haversineDistance.execute(a_lat, a_long, b_lat, b_long);
+            }
             final Value ret = haversineDistance.execute(a_lat, a_long, b_lat, b_long);
 
             return ret.asDouble();
