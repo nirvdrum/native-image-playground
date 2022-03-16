@@ -156,7 +156,7 @@
                         <configuration>
                             <mainClass>com.shopify.truffleruby.NativeLibrary</mainClass>
                             <imageName>lib${launcher.name}</imageName>
-                            <buildArgs>--shared</buildArgs>
+                            <buildArgs>--shared -H:+ParseRuntimeOptions</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -482,7 +482,7 @@
                         <configuration>
                             <mainClass>com.shopify.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
-                            <buildArgs>--shared -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
+                            <buildArgs>--shared --language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
