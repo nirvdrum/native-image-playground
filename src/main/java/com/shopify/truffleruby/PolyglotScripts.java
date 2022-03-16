@@ -3,7 +3,7 @@ package com.shopify.truffleruby;
 public class PolyglotScripts {
     public static String getHaversineRuby() {
         return """
-                EARTH_RADIUS = 6371
+                EARTH_RADIUS = 6371 unless defined?(EARTH_RADIUS)
                             
                 ->(a_lat, a_long, b_lat, b_long) do
                     a_lat_radians = a_lat * Math::PI / 180

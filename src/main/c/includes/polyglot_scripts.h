@@ -2,8 +2,8 @@
 #define __POLYGLOT_SCRIPTS_H
 
 const char* JS_HAVERSINE_DISTANCE =
-  "const EARTH_RADIUS = 6371;\n"
   "(a_lat, a_long, b_lat, b_long) => {\n"
+  "    const EARTH_RADIUS = 6371;\n"
   "    const a_lat_radians = a_lat * Math.PI / 180;\n"
   "    const a_long_radians = a_long * Math.PI / 180;\n"
   "    const b_lat_radians = b_lat * Math.PI / 180;\n"
@@ -16,7 +16,7 @@ const char* JS_HAVERSINE_DISTANCE =
   "}";
 
 const char* RUBY_HAVERSINE_DISTANCE =
-  "EARTH_RADIUS = 6371\n"
+  "EARTH_RADIUS = 6371 unless defined?(EARTH_RADIUS)\n"
   "->(a_lat, a_long, b_lat, b_long) do\n"
   "    a_lat_radians = a_lat * Math::PI / 180\n"
   "    a_long_radians = a_long * Math::PI / 180\n"
