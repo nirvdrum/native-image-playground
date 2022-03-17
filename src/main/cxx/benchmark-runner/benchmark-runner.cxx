@@ -1,30 +1,27 @@
 #include <benchmark/benchmark.h>
 #include <jni.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 
 #include "libbenchmark-runner.h"
 #include "polyglot_scripts.h"
 
 #ifdef DEBUG
-#define CHECK_EXCEPTION(env)                        \
-  ({                                                \
-    bool exceptionOccurred = env->ExceptionCheck(); \
-    if (exceptionOccurred) {                        \
-      env->ExceptionDescribe();                     \
-    }                                               \
-  })
+  #define CHECK_EXCEPTION(env)                        \
+    ({                                                \
+      bool exceptionOccurred = env->ExceptionCheck(); \
+      if (exceptionOccurred) {                        \
+        env->ExceptionDescribe();                     \
+      }                                               \
+    })
 #else
-#define CHECK_EXCEPTION(env) 0
+  #define CHECK_EXCEPTION(env) 0
 #endif
 
-using namespace std;
-
-enum exec_mode {
-  CENTRY_JAVA_DISTANCE,
+enum class exec_mode : long {
+  CENTRY_JAVA_DISTANCE = 0,
   CENTRY_RUBY_DISTANCE,
   CENTRY_POLYGLOT_DISTANCE,
   JNI_JAVA_DISTANCE,
@@ -52,7 +49,7 @@ volatile double B_LAT = 40.7127;
 volatile double B_LONG = -74.0059;
 
 static void DoCEntrySetup(const benchmark::State& state) {
-  if (nullptr == isolate_thread) {
+  if (isolate_thread == nullptr) {
     isolate_thread = create_isolate();
   }
 
@@ -70,7 +67,7 @@ static void DoCEntryTeardown(const benchmark::State& state) {
 }
 
 static void DoJNISetup(const benchmark::State& state) {
-  if (nullptr == jvm) {
+  if (jvm == nullptr) {
     JavaVMInitArgs vm_args;
     JavaVMOption* options = new JavaVMOption[1];
     options[0].optionString = (char*)"-Djava.class.path=/usr/lib/java";
@@ -141,7 +138,7 @@ static void DoJNISetup(const benchmark::State& state) {
 
 static void DoJNITeardown(const benchmark::State& state) {
 #ifndef REUSE_CONTEXT
-  if (nullptr != jvm) {
+  if (jvm != nullptr) {
     jvm->DestroyJavaVM();
     jvm = nullptr;
     env = nullptr;
@@ -285,42 +282,42 @@ BENCHMARK_CAPTURE(BM_JNIPolyglotDistance, placeholder, "js",
     ->Setup(DoJNISetup)
     ->Teardown(DoJNITeardown);
 
-void centry_function(exec_mode mode, const char* language, const char* code,
+void centry_function(const exec_mode mode, const char* language, const char* code,
                      double a_lat, double a_long, double b_lat, double b_long) {
   graal_isolatethread_t* thread = create_isolate();
 
   switch (mode) {
     case CENTRY_JAVA_DISTANCE: {
-      printf("%.2f km\n", distance(thread, a_lat, a_long, b_lat, b_long));
+      std::printf("%.2f km\n", distance(thread, a_lat, a_long, b_lat, b_long));
       break;
     }
 
     case CENTRY_RUBY_DISTANCE: {
-      printf("%.2f km\n", distance_ruby(thread, a_lat, a_long, b_lat, b_long));
+      std::printf("%.2f km\n", distance_ruby(thread, a_lat, a_long, b_lat, b_long));
       break;
     }
 
     case CENTRY_POLYGLOT_DISTANCE: {
-      printf("%.2f km\n",
+      std::printf("%.2f km\n",
              distance_polyglot(thread, (char*)language, (char*)code, a_lat,
                                a_long, b_lat, b_long));
       break;
     }
 
     default: {
-      fprintf(stderr, "Unexpected mode encountered for CEntry calls: %d\n",
+      std::fprintf(std::stderr, "Unexpected mode encountered for CEntry calls: %d\n",
               mode);
-      exit(1);
+      std::exit(1);
     }
   }
 
   tear_down_isolate(thread);
 }
 
-void jni_function(exec_mode mode, const char* language, const char* code,
+void jni_function(const exec_mode mode, const char* language, const char* code,
                   double a_lat, double a_long, double b_lat, double b_long) {
-  JavaVM* jvm;
-  JNIEnv* env;
+  JavaVM* jvm = nullptr;
+  JNIEnv* env = nullptr;
   JavaVMInitArgs vm_args;
   JavaVMOption* options = new JavaVMOption[1];
   options[0].optionString = (char*)"-Djava.class.path=/usr/lib/java";
@@ -390,8 +387,8 @@ void jni_function(exec_mode mode, const char* language, const char* code,
   CHECK_EXCEPTION(env);
 
 #ifdef DEBUG
-  cout << "Language: " << language << "\n";
-  cout << "Code: " << code << "\n";
+  std::cout << "Language: " << language << "\n";
+  std::cout << "Code: " << code << "\n";
 #endif
 
   switch (mode) {
@@ -403,7 +400,7 @@ void jni_function(exec_mode mode, const char* language, const char* code,
       jdouble distance =
           env->CallStaticDoubleMethod(javaDistanceClass, javaDistanceMethod,
                                       nullptr, a_lat, a_long, b_lat, b_long);
-      printf("%.2f km\n", distance);
+      std::printf("%.2f km\n", distance);
 
       break;
     }
@@ -417,13 +414,13 @@ void jni_function(exec_mode mode, const char* language, const char* code,
           env->CallStaticDoubleMethod(rubyDistanceClass, rubyDistanceMethod,
                                       nullptr, a_lat, a_long, b_lat, b_long);
       CHECK_EXCEPTION(env);
-      printf("%.2f km\n", distance);
+      std::printf("%.2f km\n", distance);
 
       break;
     }
 
     case JNI_POLYGLOT_DISTANCE: {
-      printf("HERE I AM\n");
+      std::printf("HERE I AM\n");
       jobject truffle_distance = env->CallObjectMethod(
           context, evalMethod, env->NewStringUTF(language),
           env->NewStringUTF(code));
@@ -450,16 +447,16 @@ void jni_function(exec_mode mode, const char* language, const char* code,
 
         jdouble distance =
             env->CallDoubleMethod(truffle_result, asDoubleMethod);
-        printf("%.2f km\n", distance);
+        std::printf("%.2f km\n", distance);
       }
 
       break;
     }
 
     default: {
-      fprintf(stderr, "Unexpected mode encountered for CEntry calls: %d\n",
+      std::fprintf(std::stderr, "Unexpected mode encountered for CEntry calls: %d\n",
               mode);
-      exit(1);
+      std::exit(1);
     }
   }
 
@@ -468,19 +465,19 @@ void jni_function(exec_mode mode, const char* language, const char* code,
 
 int main2(int argc, char** argv) {
   if (argc != 7) {
-    fprintf(stderr,
+    std::fprintf(std::stderr,
             "Usage: %s <exec_mode> <language>[js|ruby] <lat1> <long1> <lat2> "
             "<long2>\n",
             argv[0]);
-    exit(1);
+    std::exit(1);
   }
 
-  auto mode = static_cast<exec_mode>(strtol(argv[1], nullptr, 10));
+  const long mode = static_cast<exec_mode>(std::strtol(argv[1], nullptr, 10));
   char* language = argv[2];
-  double a_lat = strtod(argv[3], nullptr);
-  double a_long = strtod(argv[4], nullptr);
-  double b_lat = strtod(argv[5], nullptr);
-  double b_long = strtod(argv[6], nullptr);
+  double a_lat = std::strtod(argv[3], nullptr);
+  double a_long = std::strtod(argv[4], nullptr);
+  double b_lat = std::strtod(argv[5], nullptr);
+  double b_long = std::strtod(argv[6], nullptr);
 
   const char* code = nullptr;
   switch (language[0]) {
@@ -491,9 +488,9 @@ int main2(int argc, char** argv) {
       code = RUBY_HAVERSINE_DISTANCE;
       break;
     default:
-      fprintf(stderr, "Haversine distance code is not provided for '%s'\n",
+      std::fprintf(std::stderr, "Haversine distance code is not provided for '%s'\n",
               language);
-      exit(1);
+      std::exit(1);
   }
 
   switch (mode) {
