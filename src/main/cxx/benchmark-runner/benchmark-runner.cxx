@@ -34,9 +34,9 @@ enum exec_mode {
 
 BENCHMARK_MAIN();
 
-graal_isolatethread_t* isolate_thread = NULL;
-JavaVM* jvm = NULL;
-JNIEnv* env = NULL;
+graal_isolatethread_t* isolate_thread = nullptr;
+JavaVM* jvm = nullptr;
+JNIEnv* env = nullptr;
 jobject context;
 jclass javaDistanceClass;
 jclass rubyDistanceClass;
@@ -52,7 +52,7 @@ volatile double B_LAT = 40.7127;
 volatile double B_LONG = -74.0059;
 
 static void DoCEntrySetup(const benchmark::State& state) {
-  if (NULL == isolate_thread) {
+  if (nullptr == isolate_thread) {
     isolate_thread = create_isolate();
   }
 
@@ -65,12 +65,12 @@ static void DoCEntrySetup(const benchmark::State& state) {
 static void DoCEntryTeardown(const benchmark::State& state) {
 #ifndef REUSE_CONTEXT
   tear_down_isolate(isolate_thread);
-  isolate_thread = NULL;
+  isolate_thread = nullptr;
 #endif
 }
 
 static void DoJNISetup(const benchmark::State& state) {
-  if (NULL == jvm) {
+  if (nullptr == jvm) {
     JavaVMInitArgs vm_args;
     JavaVMOption* options = new JavaVMOption[1];
     options[0].optionString = (char*)"-Djava.class.path=/usr/lib/java";
@@ -141,10 +141,10 @@ static void DoJNISetup(const benchmark::State& state) {
 
 static void DoJNITeardown(const benchmark::State& state) {
 #ifndef REUSE_CONTEXT
-  if (NULL != jvm) {
+  if (nullptr != jvm) {
     jvm->DestroyJavaVM();
-    jvm = NULL;
-    env = NULL;
+    jvm = nullptr;
+    env = nullptr;
   }
 #endif
 }
@@ -198,7 +198,7 @@ static void BM_JNIJavaDistance(benchmark::State& state, double a_lat,
                              "(Lorg/graalvm/nativeimage/IsolateThread;DDDD)D");
 
   for (auto _ : state) {
-    env->CallStaticDoubleMethod(javaDistanceClass, javaDistanceMethod, NULL,
+    env->CallStaticDoubleMethod(javaDistanceClass, javaDistanceMethod, nullptr,
                                 a_lat, a_long, b_lat, b_long);
   }
 }
@@ -210,7 +210,7 @@ static void BM_JNIRubyDistance(benchmark::State& state, double a_lat,
                              "(Lorg/graalvm/nativeimage/IsolateThread;DDDD)D");
 
   for (auto _ : state) {
-    env->CallStaticDoubleMethod(rubyDistanceClass, rubyDistanceMethod, NULL,
+    env->CallStaticDoubleMethod(rubyDistanceClass, rubyDistanceMethod, nullptr,
                                 a_lat, a_long, b_lat, b_long);
   }
 }
@@ -402,7 +402,7 @@ void jni_function(exec_mode mode, const char* language, const char* code,
 
       jdouble distance =
           env->CallStaticDoubleMethod(javaDistanceClass, javaDistanceMethod,
-                                      NULL, a_lat, a_long, b_lat, b_long);
+                                      nullptr, a_lat, a_long, b_lat, b_long);
       printf("%.2f km\n", distance);
 
       break;
@@ -415,7 +415,7 @@ void jni_function(exec_mode mode, const char* language, const char* code,
 
       jdouble distance =
           env->CallStaticDoubleMethod(rubyDistanceClass, rubyDistanceMethod,
-                                      NULL, a_lat, a_long, b_lat, b_long);
+                                      nullptr, a_lat, a_long, b_lat, b_long);
       CHECK_EXCEPTION(env);
       printf("%.2f km\n", distance);
 
@@ -475,14 +475,14 @@ int main2(int argc, char** argv) {
     exit(1);
   }
 
-  auto mode = static_cast<exec_mode>(strtol(argv[1], NULL, 10));
+  auto mode = static_cast<exec_mode>(strtol(argv[1], nullptr, 10));
   char* language = argv[2];
-  double a_lat = strtod(argv[3], NULL);
-  double a_long = strtod(argv[4], NULL);
-  double b_lat = strtod(argv[5], NULL);
-  double b_long = strtod(argv[6], NULL);
+  double a_lat = strtod(argv[3], nullptr);
+  double a_long = strtod(argv[4], nullptr);
+  double b_lat = strtod(argv[5], nullptr);
+  double b_long = strtod(argv[6], nullptr);
 
-  const char* code = NULL;
+  const char* code = nullptr;
   switch (language[0]) {
     case 'j':
       code = JS_HAVERSINE_DISTANCE;
