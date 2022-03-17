@@ -46,15 +46,20 @@ jmethodID doubleValueOfMethod;
 jmethodID asDoubleMethod;
 jmethodID executeMethod;
 
+volatile double A_LAT = 51.507222;
+volatile double A_LONG = -0.1275;
+volatile double B_LAT = 40.7127;
+volatile double B_LONG = -74.0059;
+
 static void DoCEntrySetup(const benchmark::State& state) {
   if (NULL == isolate_thread) {
     isolate_thread = create_isolate();
   }
 
-  distance_ruby(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+  distance_ruby(isolate_thread, A_LAT, A_LONG, B_LAT, B_LONG);
   distance_polyglot(isolate_thread, (char*)"ruby",
-                    (char*)RUBY_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127,
-                    -74.0059);
+                    (char*)RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT,
+                    B_LONG);
 }
 
 static void DoCEntryTeardown(const benchmark::State& state) {
@@ -144,65 +149,76 @@ static void DoJNITeardown(const benchmark::State& state) {
 #endif
 }
 
-static void BM_CEntryJavaDistance(benchmark::State& state) {
+static void BM_CEntryJavaDistance(benchmark::State& state, double a_lat,
+                                  double a_long, double b_lat, double b_long) {
   for (auto _ : state) {
-    distance(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+    distance(isolate_thread, a_lat, a_long, b_lat, b_long);
   }
 }
 
-static void BM_CEntryRubyDistance(benchmark::State& state) {
-  distance_ruby(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+static void BM_CEntryRubyDistance(benchmark::State& state, double a_lat,
+                                  double a_long, double b_lat, double b_long) {
+  distance_ruby(isolate_thread, a_lat, a_long, b_lat, b_long);
 
   for (auto _ : state) {
-    distance_ruby(isolate_thread, 51.507222, -0.1275, 40.7127, -74.0059);
+    distance_ruby(isolate_thread, a_lat, a_long, b_lat, b_long);
   }
 }
 
-static void BM_CEntryPolyglotRubyDistance(benchmark::State& state) {
-  // distance_polyglot(isolate_thread, (char *) "ruby", (char *)
-  // RUBY_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127, -74.0059);
+static void BM_CEntryPolyglotRubyDistance(benchmark::State& state, double a_lat,
+                                          double a_long, double b_lat,
+                                          double b_long) {
+  distance_polyglot(isolate_thread, (char*)"ruby",
+                    (char*)RUBY_HAVERSINE_DISTANCE, a_lat, a_long, b_lat,
+                    b_long);
 
   for (auto _ : state) {
     distance_polyglot(isolate_thread, (char*)"ruby",
-                      (char*)RUBY_HAVERSINE_DISTANCE, 51.507222, -0.1275,
-                      40.7127, -74.0059);
+                      (char*)RUBY_HAVERSINE_DISTANCE, a_lat, a_long, b_lat,
+                      b_long);
   }
 }
 
-static void BM_CEntryPolyglotJsDistance(benchmark::State& state) {
-  // distance_polyglot(isolate_thread, (char *) "js", (char *)
-  // JS_HAVERSINE_DISTANCE, 51.507222, -0.1275, 40.7127, -74.0059);
+static void BM_CEntryPolyglotJsDistance(benchmark::State& state, double a_lat,
+                                        double a_long, double b_lat,
+                                        double b_long) {
+  distance_polyglot(isolate_thread, (char*)"js", (char*)JS_HAVERSINE_DISTANCE,
+                    a_lat, a_long, b_lat, b_long);
 
   for (auto _ : state) {
     distance_polyglot(isolate_thread, (char*)"js", (char*)JS_HAVERSINE_DISTANCE,
-                      51.507222, -0.1275, 40.7127, -74.0059);
+                      a_lat, a_long, b_lat, b_long);
   }
 }
 
-static void BM_JNIJavaDistance(benchmark::State& state) {
+static void BM_JNIJavaDistance(benchmark::State& state, double a_lat,
+                               double a_long, double b_lat, double b_long) {
   jmethodID javaDistanceMethod =
       env->GetStaticMethodID(javaDistanceClass, "distance",
                              "(Lorg/graalvm/nativeimage/IsolateThread;DDDD)D");
 
   for (auto _ : state) {
     env->CallStaticDoubleMethod(javaDistanceClass, javaDistanceMethod, NULL,
-                                51.507222, -0.1275, 40.7127, -74.0059);
+                                a_lat, a_long, b_lat, b_long);
   }
 }
 
-static void BM_JNIRubyDistance(benchmark::State& state) {
+static void BM_JNIRubyDistance(benchmark::State& state, double a_lat,
+                               double a_long, double b_lat, double b_long) {
   jmethodID rubyDistanceMethod =
       env->GetStaticMethodID(rubyDistanceClass, "distance",
                              "(Lorg/graalvm/nativeimage/IsolateThread;DDDD)D");
 
   for (auto _ : state) {
     env->CallStaticDoubleMethod(rubyDistanceClass, rubyDistanceMethod, NULL,
-                                51.507222, -0.1275, 40.7127, -74.0059);
+                                a_lat, a_long, b_lat, b_long);
   }
 }
 
 static void BM_JNIPolyglotDistance(benchmark::State& state,
-                                   const char* language, const char* code) {
+                                   const char* language, const char* code,
+                                   double a_lat, double a_long, double b_lat,
+                                   double b_long) {
   jobject truffle_distance =
       env->CallObjectMethod(context, evalMethod, env->NewStringUTF(language),
                             env->NewStringUTF(code));
@@ -211,16 +227,16 @@ static void BM_JNIPolyglotDistance(benchmark::State& state,
   jobjectArray distanceArgs = env->NewObjectArray(4, doubleClass, 0);
   env->SetObjectArrayElement(
       distanceArgs, 0,
-      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, 51.507222));
+      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, a_lat));
   env->SetObjectArrayElement(
       distanceArgs, 1,
-      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, -0.1275));
+      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, a_long));
   env->SetObjectArrayElement(
       distanceArgs, 2,
-      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, 40.7127));
+      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, b_lat));
   env->SetObjectArrayElement(
       distanceArgs, 3,
-      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, -74.0059));
+      env->CallStaticObjectMethod(doubleClass, doubleValueOfMethod, b_long));
 
   for (auto _ : state) {
     jobject truffle_result =
@@ -230,43 +246,41 @@ static void BM_JNIPolyglotDistance(benchmark::State& state,
   }
 }
 
-static void BM_JNIPolyglotRubyDistance(benchmark::State& state) {
-  BM_JNIPolyglotDistance(state, "ruby", RUBY_HAVERSINE_DISTANCE);
-}
-
-static void BM_JNIPolyglotJsDistance(benchmark::State& state) {
-  BM_JNIPolyglotDistance(state, "js", JS_HAVERSINE_DISTANCE);
-}
-
-BENCHMARK(BM_CEntryJavaDistance)
+BENCHMARK_CAPTURE(BM_CEntryJavaDistance, placeholder, A_LAT, A_LONG, B_LAT,
+                  B_LONG)
     ->Name("@CEntryPoint: Java")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK(BM_CEntryRubyDistance)
+BENCHMARK_CAPTURE(BM_CEntryRubyDistance, placeholder, A_LAT, A_LONG, B_LAT,
+                  B_LONG)
     ->Name("@CEntryPoint: Ruby")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK(BM_CEntryPolyglotRubyDistance)
+BENCHMARK_CAPTURE(BM_CEntryPolyglotRubyDistance, placeholder, A_LAT, A_LONG,
+                  B_LAT, B_LONG)
     ->Name("@CEntryPoint: Polyglot (Ruby)")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK(BM_CEntryPolyglotJsDistance)
+BENCHMARK_CAPTURE(BM_CEntryPolyglotJsDistance, placeholder, A_LAT, A_LONG,
+                  B_LAT, B_LONG)
     ->Name("@CEntryPoint: Polyglot (JS)")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK(BM_JNIJavaDistance)
+BENCHMARK_CAPTURE(BM_JNIJavaDistance, placeholder, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("JNI: Java")
     ->Setup(DoJNISetup)
     ->Teardown(DoJNITeardown);
-BENCHMARK(BM_JNIRubyDistance)
+BENCHMARK_CAPTURE(BM_JNIRubyDistance, placeholder, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("JNI: Ruby")
     ->Setup(DoJNISetup)
     ->Teardown(DoJNITeardown);
-BENCHMARK(BM_JNIPolyglotRubyDistance)
+BENCHMARK_CAPTURE(BM_JNIPolyglotDistance, placeholder, "ruby",
+                  RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("JNI: Polyglot (Ruby)")
     ->Setup(DoJNISetup)
     ->Teardown(DoJNITeardown);
-BENCHMARK(BM_JNIPolyglotJsDistance)
+BENCHMARK_CAPTURE(BM_JNIPolyglotDistance, placeholder, "js",
+                  JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("JNI: Polyglot (JS)")
     ->Setup(DoJNISetup)
     ->Teardown(DoJNITeardown);
@@ -287,10 +301,9 @@ void centry_function(exec_mode mode, const char* language, const char* code,
     }
 
     case CENTRY_POLYGLOT_DISTANCE: {
-      for (int i = 0; i < 10; i++)
-        printf("%.2f km\n",
-               distance_polyglot(thread, (char*)language, (char*)code, a_lat,
-                                 a_long, b_lat, b_long));
+      printf("%.2f km\n",
+             distance_polyglot(thread, (char*)language, (char*)code, a_lat,
+                               a_long, b_lat, b_long));
       break;
     }
 
