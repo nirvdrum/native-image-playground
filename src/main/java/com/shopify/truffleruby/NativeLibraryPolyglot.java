@@ -22,8 +22,22 @@ public class NativeLibraryPolyglot {
         System.out.println("You called native-library-polyglot-runner with: " + args.toString());
     }
 
-    @CEntryPoint(name = "distance_polyglot")
+    @CEntryPoint(name = "distance_polyglot_no_cache")
     public static double distance(IsolateThread thread,
+                                  CCharPointer cLanguage,
+                                  CCharPointer cCode,
+                                  double aLat, double aLong,
+                                  double bLat, double bLong) {
+        final String code = CTypeConversion.toJavaString(cCode);
+        final String language = CTypeConversion.toJavaString(cLanguage);
+
+        var function = context.eval(language, code);
+
+        return function.execute(aLat, aLong, bLat, bLong).asDouble();
+    }
+
+    @CEntryPoint(name = "distance_polyglot_thread_safe_parse_cache")
+    public static double distanceParseCache(IsolateThread thread,
             CCharPointer cLanguage,
             CCharPointer cCode,
             double aLat, double aLong,
@@ -40,7 +54,7 @@ public class NativeLibraryPolyglot {
         return function.execute(aLat, aLong, bLat, bLong).asDouble();
     }
 
-    @CEntryPoint(name = "distance_polyglot_thread_unsafe")
+    @CEntryPoint(name = "distance_polyglot_thread_unsafe_parse_cache")
     public static double distanceThreadUnsafe(IsolateThread thread,
             CCharPointer cLanguage,
             CCharPointer cCode,

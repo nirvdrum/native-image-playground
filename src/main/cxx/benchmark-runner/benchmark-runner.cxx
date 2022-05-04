@@ -55,9 +55,24 @@ static void DoCEntrySetup(const benchmark::State& state) {
   }
 
   distance_ruby(isolate_thread, A_LAT, A_LONG, B_LAT, B_LONG);
-  distance_polyglot(isolate_thread, (char*)"ruby",
-                    (char*)RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT,
-                    B_LONG);
+  distance_polyglot_thread_safe_parse_cache(isolate_thread, (char*)"ruby",
+                                            (char*)RUBY_HAVERSINE_DISTANCE,
+                                            A_LAT, A_LONG, B_LAT, B_LONG);
+  distance_polyglot_thread_safe_parse_cache(isolate_thread, (char*)"js",
+                                            (char*)JS_HAVERSINE_DISTANCE, A_LAT,
+                                            A_LONG, B_LAT, B_LONG);
+  /*distance_polyglot_thread_unsafe_parse_cache(isolate_thread, (char*)"ruby",
+                                              (char*)RUBY_HAVERSINE_DISTANCE,
+                                              A_LAT, A_LONG, B_LAT, B_LONG);
+  distance_polyglot_thread_unsafe_parse_cache(isolate_thread, (char*)"js",
+                                              (char*)JS_HAVERSINE_DISTANCE,
+                                              A_LAT, A_LONG, B_LAT, B_LONG);*/
+  distance_polyglot_no_cache(isolate_thread, (char*)"ruby",
+                             (char*)RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG,
+                             B_LAT, B_LONG);
+  distance_polyglot_no_cache(isolate_thread, (char*)"js",
+                             (char*)JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT,
+                             B_LONG);
 }
 
 static void DoCEntryTeardown(const benchmark::State& state) {
@@ -163,36 +178,47 @@ static void BM_CEntryRubyDistance(benchmark::State& state, double a_lat,
   }
 }
 
-static void BM_CEntryPolyglotDistance(benchmark::State& state,
-                                   const char* language, const char* code,
-                                   double a_lat, double a_long, double b_lat,
-                                   double b_long) {
-   distance_polyglot(isolate_thread, (char*) language,
-                     (char*) code, a_lat, a_long, b_lat,
-                     b_long);
+static void BM_CEntryPolyglotDistanceNoCache(benchmark::State& state,
+                                             const char* language,
+                                             const char* code, double a_lat,
+                                             double a_long, double b_lat,
+                                             double b_long) {
+  distance_polyglot_no_cache(isolate_thread, (char*)language, (char*)code,
+                             a_lat, a_long, b_lat, b_long);
 
-   for (auto _ : state) {
-     distance_polyglot(isolate_thread, (char*) language,
-                       (char*) code, a_lat, a_long, b_lat,
-                       b_long);
-   }
- }
+  for (auto _ : state) {
+    distance_polyglot_no_cache(isolate_thread, (char*)language, (char*)code,
+                               a_lat, a_long, b_lat, b_long);
+  }
+}
 
- static void BM_CEntryPolyglotDistanceThreadUnsafe(benchmark::State& state,
-                                       const char* language, const char* code,
-                                       double a_lat, double a_long, double b_lat,
-                                       double b_long) {
-   distance_polyglot_thread_unsafe(isolate_thread, (char*) language,
-                     (char*) code, a_lat, a_long, b_lat,
-                     b_long);
+static void BM_CEntryPolyglotDistanceThreadSafeParseCache(
+    benchmark::State& state, const char* language, const char* code,
+    double a_lat, double a_long, double b_lat, double b_long) {
+  distance_polyglot_thread_safe_parse_cache(isolate_thread, (char*)language,
+                                            (char*)code, a_lat, a_long, b_lat,
+                                            b_long);
 
-   for (auto _ : state) {
-     distance_polyglot_thread_unsafe(isolate_thread, (char*) language,
-                       (char*) code, a_lat, a_long, b_lat,
-                       b_long);
-   }
- }
+  for (auto _ : state) {
+    distance_polyglot_thread_safe_parse_cache(isolate_thread, (char*)language,
+                                              (char*)code, a_lat, a_long, b_lat,
+                                              b_long);
+  }
+}
 
+static void BM_CEntryPolyglotDistanceThreadUnsafeParseCache(
+    benchmark::State& state, const char* language, const char* code,
+    double a_lat, double a_long, double b_lat, double b_long) {
+  distance_polyglot_thread_unsafe_parse_cache(isolate_thread, (char*)language,
+                                              (char*)code, a_lat, a_long, b_lat,
+                                              b_long);
+
+  for (auto _ : state) {
+    distance_polyglot_thread_unsafe_parse_cache(isolate_thread, (char*)language,
+                                                (char*)code, a_lat, a_long,
+                                                b_lat, b_long);
+  }
+}
 
 static void BM_JNIJavaDistance(benchmark::State& state, double a_lat,
                                double a_long, double b_lat, double b_long) {
@@ -268,24 +294,34 @@ BENCHMARK_CAPTURE(BM_CEntryRubyDistance, placeholder, A_LAT, A_LONG, B_LAT,
     ->Name("@CEntryPoint: Ruby")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK_CAPTURE(BM_CEntryPolyglotDistance, placeholder, "ruby",
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceNoCache, placeholder, "ruby",
                   RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("@CEntryPoint: Polyglot (Ruby)")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK_CAPTURE(BM_CEntryPolyglotDistance, placeholder, "js",
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceNoCache, placeholder, "js",
                   JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("@CEntryPoint: Polyglot (JS)")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafe, placeholder, "ruby",
-                  RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
-    ->Name("@CEntryPoint: Polyglot (Ruby) - Thread Unsafe")
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadSafeParseCache, placeholder,
+                  "ruby", RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (Ruby) - Thread Safe Parse Cache")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafe, placeholder, "js",
-                  JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
-    ->Name("@CEntryPoint: Polyglot (JS) - Thread Unsafe")
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadSafeParseCache, placeholder,
+                  "js", JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (JS) - Thread Safe Parse Cache")
+    ->Setup(DoCEntrySetup)
+    ->Teardown(DoCEntryTeardown);
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafeParseCache, placeholder,
+                  "ruby", RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (Ruby) - Thread Unsafe Parse Cache")
+    ->Setup(DoCEntrySetup)
+    ->Teardown(DoCEntryTeardown);
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafeParseCache, placeholder,
+                  "js", JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (JS) - Thread Unsafe Parse Cache")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
 BENCHMARK_CAPTURE(BM_JNIJavaDistance, placeholder, A_LAT, A_LONG, B_LAT, B_LONG)
@@ -325,9 +361,9 @@ void centry_function(const ExecMode mode, const char* language,
     }
 
     case ExecMode::CENTRY_POLYGLOT_DISTANCE: {
-      std::printf("%.2f km\n",
-                  distance_polyglot(thread, (char*)language, (char*)code, a_lat,
-                                    a_long, b_lat, b_long));
+      std::printf("%.2f km\n", distance_polyglot_no_cache(
+                                   thread, (char*)language, (char*)code, a_lat,
+                                   a_long, b_lat, b_long));
       break;
     }
 
