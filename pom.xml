@@ -524,6 +524,7 @@
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>-std=c++17</argument>
                                 <argument>-o${launcher.name}</argument>
+                                <argument>-O3</argument>
                                 <argument>${project.build.sourceDirectory}/../cxx/${launcher.name}/haversine.cxx</argument>
                                 <argument>${project.build.sourceDirectory}/../cxx/${launcher.name}/${launcher.name}.cxx</argument>
                                 <argument>-lbenchmark</argument>
