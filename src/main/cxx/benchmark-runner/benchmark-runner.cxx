@@ -178,6 +178,22 @@ static void BM_CEntryPolyglotDistance(benchmark::State& state,
    }
  }
 
+ static void BM_CEntryPolyglotDistanceThreadUnsafe(benchmark::State& state,
+                                       const char* language, const char* code,
+                                       double a_lat, double a_long, double b_lat,
+                                       double b_long) {
+   distance_polyglot_thread_unsafe(isolate_thread, (char*) language,
+                     (char*) code, a_lat, a_long, b_lat,
+                     b_long);
+
+   for (auto _ : state) {
+     distance_polyglot_thread_unsafe(isolate_thread, (char*) language,
+                       (char*) code, a_lat, a_long, b_lat,
+                       b_long);
+   }
+ }
+
+
 static void BM_JNIJavaDistance(benchmark::State& state, double a_lat,
                                double a_long, double b_lat, double b_long) {
   jmethodID javaDistanceMethod =
@@ -260,6 +276,16 @@ BENCHMARK_CAPTURE(BM_CEntryPolyglotDistance, placeholder, "ruby",
 BENCHMARK_CAPTURE(BM_CEntryPolyglotDistance, placeholder, "js",
                   JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("@CEntryPoint: Polyglot (JS)")
+    ->Setup(DoCEntrySetup)
+    ->Teardown(DoCEntryTeardown);
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafe, placeholder, "ruby",
+                  RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (Ruby) - Thread Unsafe")
+    ->Setup(DoCEntrySetup)
+    ->Teardown(DoCEntryTeardown);
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafe, placeholder, "js",
+                  JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (JS) - Thread Unsafe")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
 BENCHMARK_CAPTURE(BM_JNIJavaDistance, placeholder, A_LAT, A_LONG, B_LAT, B_LONG)

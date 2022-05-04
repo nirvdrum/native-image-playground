@@ -12,7 +12,7 @@ public class NativeLibrary {
     }
 
     @CEntryPoint(name = "distance")
-    public static double distance(IsolateThread thread,
+    private static double distance(IsolateThread thread,
             double a_lat, double a_long,
             double b_lat, double b_long) {
         return DistanceUtils.getHaversineDistance(a_lat, a_long, b_lat, b_long);
