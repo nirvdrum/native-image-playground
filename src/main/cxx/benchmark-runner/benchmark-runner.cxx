@@ -9,19 +9,19 @@
 #include "polyglot_scripts.h"
 
 #ifdef DEBUG
-  #define CHECK_EXCEPTION(env)                        \
-    ({                                                \
-      bool exceptionOccurred = env->ExceptionCheck(); \
-      if (exceptionOccurred) {                        \
-        env->ExceptionDescribe();                     \
-      }                                               \
-    })
+#define CHECK_EXCEPTION(env)                        \
+  ({                                                \
+    bool exceptionOccurred = env->ExceptionCheck(); \
+    if (exceptionOccurred) {                        \
+      env->ExceptionDescribe();                     \
+    }                                               \
+  })
 #else
-  #define CHECK_EXCEPTION(env) 0
+#define CHECK_EXCEPTION(env) 0
 #endif
 
-enum class exec_mode : long {
-  CENTRY_JAVA_DISTANCE = 0,
+enum class ExecMode : long {
+  CENTRY_JAVA_DISTANCE = 0L,
   CENTRY_RUBY_DISTANCE,
   CENTRY_POLYGLOT_DISTANCE,
   JNI_JAVA_DISTANCE,
@@ -282,31 +282,33 @@ BENCHMARK_CAPTURE(BM_JNIPolyglotDistance, placeholder, "js",
     ->Setup(DoJNISetup)
     ->Teardown(DoJNITeardown);
 
-void centry_function(const exec_mode mode, const char* language, const char* code,
-                     double a_lat, double a_long, double b_lat, double b_long) {
+void centry_function(const ExecMode mode, const char* language,
+                     const char* code, double a_lat, double a_long,
+                     double b_lat, double b_long) {
   graal_isolatethread_t* thread = create_isolate();
 
   switch (mode) {
-    case CENTRY_JAVA_DISTANCE: {
+    case ExecMode::CENTRY_JAVA_DISTANCE: {
       std::printf("%.2f km\n", distance(thread, a_lat, a_long, b_lat, b_long));
       break;
     }
 
-    case CENTRY_RUBY_DISTANCE: {
-      std::printf("%.2f km\n", distance_ruby(thread, a_lat, a_long, b_lat, b_long));
+    case ExecMode::CENTRY_RUBY_DISTANCE: {
+      std::printf("%.2f km\n",
+                  distance_ruby(thread, a_lat, a_long, b_lat, b_long));
       break;
     }
 
-    case CENTRY_POLYGLOT_DISTANCE: {
+    case ExecMode::CENTRY_POLYGLOT_DISTANCE: {
       std::printf("%.2f km\n",
-             distance_polyglot(thread, (char*)language, (char*)code, a_lat,
-                               a_long, b_lat, b_long));
+                  distance_polyglot(thread, (char*)language, (char*)code, a_lat,
+                                    a_long, b_lat, b_long));
       break;
     }
 
     default: {
-      std::fprintf(std::stderr, "Unexpected mode encountered for CEntry calls: %d\n",
-              mode);
+      std::fprintf(stderr,
+                   "Unexpected mode encountered for CEntry calls: %ld\n", mode);
       std::exit(1);
     }
   }
@@ -314,7 +316,7 @@ void centry_function(const exec_mode mode, const char* language, const char* cod
   tear_down_isolate(thread);
 }
 
-void jni_function(const exec_mode mode, const char* language, const char* code,
+void jni_function(const ExecMode mode, const char* language, const char* code,
                   double a_lat, double a_long, double b_lat, double b_long) {
   JavaVM* jvm = nullptr;
   JNIEnv* env = nullptr;
@@ -392,7 +394,7 @@ void jni_function(const exec_mode mode, const char* language, const char* code,
 #endif
 
   switch (mode) {
-    case JNI_JAVA_DISTANCE: {
+    case ExecMode::JNI_JAVA_DISTANCE: {
       jmethodID javaDistanceMethod = env->GetStaticMethodID(
           javaDistanceClass, "distance",
           "(Lorg/graalvm/nativeimage/IsolateThread;DDDD)D");
@@ -405,7 +407,7 @@ void jni_function(const exec_mode mode, const char* language, const char* code,
       break;
     }
 
-    case JNI_RUBY_DISTANCE: {
+    case ExecMode::JNI_RUBY_DISTANCE: {
       jmethodID rubyDistanceMethod = env->GetStaticMethodID(
           rubyDistanceClass, "distance",
           "(Lorg/graalvm/nativeimage/IsolateThread;DDDD)D");
@@ -419,7 +421,7 @@ void jni_function(const exec_mode mode, const char* language, const char* code,
       break;
     }
 
-    case JNI_POLYGLOT_DISTANCE: {
+    case ExecMode::JNI_POLYGLOT_DISTANCE: {
       std::printf("HERE I AM\n");
       jobject truffle_distance = env->CallObjectMethod(
           context, evalMethod, env->NewStringUTF(language),
@@ -454,8 +456,8 @@ void jni_function(const exec_mode mode, const char* language, const char* code,
     }
 
     default: {
-      std::fprintf(std::stderr, "Unexpected mode encountered for CEntry calls: %d\n",
-              mode);
+      std::fprintf(stderr,
+                   "Unexpected mode encountered for CEntry calls: %ld\n", mode);
       std::exit(1);
     }
   }
@@ -465,14 +467,15 @@ void jni_function(const exec_mode mode, const char* language, const char* code,
 
 int main2(int argc, char** argv) {
   if (argc != 7) {
-    std::fprintf(std::stderr,
-            "Usage: %s <exec_mode> <language>[js|ruby] <lat1> <long1> <lat2> "
-            "<long2>\n",
-            argv[0]);
+    std::fprintf(
+        stderr,
+        "Usage: %s <ExecMode> <language>[js|ruby] <lat1> <long1> <lat2> "
+        "<long2>\n",
+        argv[0]);
     std::exit(1);
   }
 
-  const long mode = static_cast<exec_mode>(std::strtol(argv[1], nullptr, 10));
+  ExecMode mode{(std::strtol(argv[1], nullptr, 10))};
   char* language = argv[2];
   double a_lat = std::strtod(argv[3], nullptr);
   double a_long = std::strtod(argv[4], nullptr);
@@ -488,22 +491,22 @@ int main2(int argc, char** argv) {
       code = RUBY_HAVERSINE_DISTANCE;
       break;
     default:
-      std::fprintf(std::stderr, "Haversine distance code is not provided for '%s'\n",
-              language);
+      std::fprintf(stderr, "Haversine distance code is not provided for '%s'\n",
+                   language);
       std::exit(1);
   }
 
   switch (mode) {
-    case CENTRY_JAVA_DISTANCE:
-    case CENTRY_RUBY_DISTANCE:
-    case CENTRY_POLYGLOT_DISTANCE: {
+    case ExecMode::CENTRY_JAVA_DISTANCE:
+    case ExecMode::CENTRY_RUBY_DISTANCE:
+    case ExecMode::CENTRY_POLYGLOT_DISTANCE: {
       centry_function(mode, language, code, a_lat, a_long, b_lat, b_long);
       break;
     }
 
-    case JNI_JAVA_DISTANCE:
-    case JNI_RUBY_DISTANCE:
-    case JNI_POLYGLOT_DISTANCE: {
+    case ExecMode::JNI_JAVA_DISTANCE:
+    case ExecMode::JNI_RUBY_DISTANCE:
+    case ExecMode::JNI_POLYGLOT_DISTANCE: {
       jni_function(mode, language, code, a_lat, a_long, b_lat, b_long);
       break;
     }
