@@ -49,8 +49,10 @@ static void DoCEntrySetup(const benchmark::State& state) {
 }
 
 static void DoCEntryTeardown(const benchmark::State& state) {
-  //cout << "Teardown\n";
-  //tear_down_isolate(isolate_thread);
+#ifndef REUSE_CONTEXT
+  tear_down_isolate(isolate_thread);
+  isolate_thread = NULL;
+#endif
 }
 
 static void DoJNISetup(const benchmark::State& state) {
@@ -106,16 +108,17 @@ static void DoJNISetup(const benchmark::State& state) {
         builder = env->CallObjectMethod(builder, optionMethod, env->NewStringUTF("ruby.no-home-provided"),
                                         env->NewStringUTF("true"));
         context = env->CallObjectMethod(builder, buildMethod);
-
     }
 }
 
 static void DoJNITeardown(const benchmark::State& state) {
-    /*if (NULL != jvm) {
-        jvm->DestroyJavaVM();
-        jvm = NULL;
-        env = NULL;
-    }*/
+#ifndef REUSE_CONTEXT
+  if (NULL != jvm) {
+    jvm->DestroyJavaVM();
+    jvm = NULL;
+    env = NULL;
+  }
+#endif
 }
 
 static void BM_CEntryJavaDistance(benchmark::State &state) {
