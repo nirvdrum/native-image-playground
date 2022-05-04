@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "haversine.h"
 #include "libbenchmark-runner.h"
 #include "polyglot_scripts.h"
 
@@ -243,6 +244,15 @@ static void BM_JNIPolyglotDistance(benchmark::State& state,
   }
 }
 
+static void BM_CppDistance(benchmark::State& state, double a_lat, double a_long,
+                           double b_lat, double b_long) {
+  for (auto _ : state) {
+    haversine_distance(a_lat, a_long, b_lat, b_long);
+  }
+}
+
+BENCHMARK_CAPTURE(BM_CppDistance, placeholder, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("C++");
 BENCHMARK_CAPTURE(BM_CEntryJavaDistance, placeholder, A_LAT, A_LONG, B_LAT,
                   B_LONG)
     ->Name("@CEntryPoint: Java")

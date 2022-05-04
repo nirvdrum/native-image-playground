@@ -510,6 +510,7 @@
                                 <argument>-I${java.home}/lib/polyglot</argument>
                                 <argument>-I${project.basedir}/target/benchmark/include</argument>
                                 <argument>-I${project.basedir}/target/benchmark/build/include</argument>
+                                <argument>-I${project.build.sourceDirectory}/../cxx/benchmark-runner</argument>
                                 <argument>-L${project.build.directory}</argument>
                                 <argument>-L${java.home}/lib/polyglot</argument>
                                 <argument>-L${java.home}/lib/server</argument>
@@ -523,6 +524,7 @@
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>-std=c++17</argument>
                                 <argument>-o${launcher.name}</argument>
+                                <argument>${project.build.sourceDirectory}/../cxx/${launcher.name}/haversine.cxx</argument>
                                 <argument>${project.build.sourceDirectory}/../cxx/${launcher.name}/${launcher.name}.cxx</argument>
                                 <argument>-lbenchmark</argument>
                             </arguments>
