@@ -15,17 +15,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <native.maven.plugin.version>0.9.9</native.maven.plugin.version>
-        <graalvm.version>22.0.0</graalvm.version>
+        <native.maven.plugin.version>0.9.11</native.maven.plugin.version>
+        <graalvm.version>22.1.0</graalvm.version>
         <sis.version>1.0</sis.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.graalvm.nativeimage</groupId>
-            <artifactId>library-support</artifactId>
+            <groupId>org.graalvm.sdk</groupId>
+            <artifactId>graal-sdk</artifactId>
             <version>${graalvm.version}</version>
-            <type>maven-plugin</type>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
