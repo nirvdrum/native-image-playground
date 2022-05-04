@@ -28,6 +28,25 @@ public class NativeLibraryPolyglot {
                                   CCharPointer cCode,
                                   double aLat, double aLong,
                                   double bLat, double bLong) {
+        try (Context context = Context.newBuilder()
+                .allowExperimentalOptions(true)
+                .option("ruby.no-home-provided", "true")
+                .build()) {
+            final String code = CTypeConversion.toJavaString(cCode);
+            final String language = CTypeConversion.toJavaString(cLanguage);
+
+            var function = context.eval(language, code);
+
+            return function.execute(aLat, aLong, bLat, bLong).asDouble();
+        }
+    }
+
+    @CEntryPoint(name = "distance_polyglot_no_parse_cache")
+    public static double distance_no_parse_cache(IsolateThread thread,
+                                  CCharPointer cLanguage,
+                                  CCharPointer cCode,
+                                  double aLat, double aLong,
+                                  double bLat, double bLong) {
         final String code = CTypeConversion.toJavaString(cCode);
         final String language = CTypeConversion.toJavaString(cLanguage);
 

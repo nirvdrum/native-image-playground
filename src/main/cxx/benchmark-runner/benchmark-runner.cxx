@@ -178,7 +178,7 @@ static void BM_CEntryRubyDistance(benchmark::State& state, double a_lat,
   }
 }
 
-static void BM_CEntryPolyglotDistanceNoCache(benchmark::State& state,
+static void BM_CEntryPolyglotDistance(benchmark::State& state,
                                              const char* language,
                                              const char* code, double a_lat,
                                              double a_long, double b_lat,
@@ -188,6 +188,20 @@ static void BM_CEntryPolyglotDistanceNoCache(benchmark::State& state,
 
   for (auto _ : state) {
     distance_polyglot_no_cache(isolate_thread, (char*)language, (char*)code,
+                               a_lat, a_long, b_lat, b_long);
+  }
+}
+
+static void BM_CEntryPolyglotDistanceNoParseCache(benchmark::State& state,
+                                             const char* language,
+                                             const char* code, double a_lat,
+                                             double a_long, double b_lat,
+                                             double b_long) {
+  distance_polyglot_no_parse_cache(isolate_thread, (char*)language, (char*)code,
+                             a_lat, a_long, b_lat, b_long);
+
+  for (auto _ : state) {
+    distance_polyglot_no_parse_cache(isolate_thread, (char*)language, (char*)code,
                                a_lat, a_long, b_lat, b_long);
   }
 }
@@ -294,34 +308,44 @@ BENCHMARK_CAPTURE(BM_CEntryRubyDistance, placeholder, A_LAT, A_LONG, B_LAT,
     ->Name("@CEntryPoint: Ruby")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceNoCache, placeholder, "ruby",
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistance, placeholder, "ruby",
                   RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("@CEntryPoint: Polyglot (Ruby)")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
-BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceNoCache, placeholder, "js",
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistance, placeholder, "js",
                   JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
     ->Name("@CEntryPoint: Polyglot (JS)")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceNoParseCache, placeholder, "ruby",
+                  RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (Ruby) - No Parse Cache")
+    ->Setup(DoCEntrySetup)
+    ->Teardown(DoCEntryTeardown);
+BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceNoParseCache, placeholder, "js",
+                  JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
+    ->Name("@CEntryPoint: Polyglot (JS) - No Parse Cache")
+    ->Setup(DoCEntrySetup)
+    ->Teardown(DoCEntryTeardown);
 BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadSafeParseCache, placeholder,
                   "ruby", RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
-    ->Name("@CEntryPoint: Polyglot (Ruby) - Thread Safe Parse Cache")
+    ->Name("@CEntryPoint: Polyglot (Ruby) - Safe Parse Cache")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
 BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadSafeParseCache, placeholder,
                   "js", JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
-    ->Name("@CEntryPoint: Polyglot (JS) - Thread Safe Parse Cache")
+    ->Name("@CEntryPoint: Polyglot (JS) - Safe Parse Cache")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
 BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafeParseCache, placeholder,
                   "ruby", RUBY_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
-    ->Name("@CEntryPoint: Polyglot (Ruby) - Thread Unsafe Parse Cache")
+    ->Name("@CEntryPoint: Polyglot (Ruby) - Unsafe Parse Cache")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
 BENCHMARK_CAPTURE(BM_CEntryPolyglotDistanceThreadUnsafeParseCache, placeholder,
                   "js", JS_HAVERSINE_DISTANCE, A_LAT, A_LONG, B_LAT, B_LONG)
-    ->Name("@CEntryPoint: Polyglot (JS) - Thread Unsafe Parse Cache")
+    ->Name("@CEntryPoint: Polyglot (JS) - Unsafe Parse Cache")
     ->Setup(DoCEntrySetup)
     ->Teardown(DoCEntryTeardown);
 BENCHMARK_CAPTURE(BM_JNIJavaDistance, placeholder, A_LAT, A_LONG, B_LAT, B_LONG)
