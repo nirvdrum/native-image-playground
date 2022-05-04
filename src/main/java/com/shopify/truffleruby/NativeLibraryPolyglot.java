@@ -1,7 +1,6 @@
 package com.shopify.truffleruby;
 
 import org.graalvm.nativeimage.IsolateThread;
-import org.graalvm.nativeimage.PinnedObject;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
@@ -11,7 +10,7 @@ import org.graalvm.polyglot.Value;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NativeLibraryPolyglot {
-    private static final ConcurrentHashMap<String, Value> codeMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Value> parseCache = new ConcurrentHashMap<>();
     private static Value function;
     private static final Context context = Context.newBuilder()
             .allowExperimentalOptions(true)
@@ -56,7 +55,7 @@ public class NativeLibraryPolyglot {
     }
 
     @CEntryPoint(name = "distance_polyglot_thread_safe_parse_cache")
-    public static double distanceParseCache(IsolateThread thread,
+    public static double distanceThreadSafeParseCache(IsolateThread thread,
             CCharPointer cLanguage,
             CCharPointer cCode,
             double aLat, double aLong,
@@ -64,7 +63,7 @@ public class NativeLibraryPolyglot {
         final String code = CTypeConversion.toJavaString(cCode);
         final String language = CTypeConversion.toJavaString(cLanguage);
 
-        var function = codeMap.computeIfAbsent(language + ":" + code, k -> context.eval(language, code));
+        var function = parseCache.computeIfAbsent(language + ":" + code, k -> context.eval(language, code));
 
         if (function == null) {
             function = context.eval(language, code);
@@ -74,7 +73,7 @@ public class NativeLibraryPolyglot {
     }
 
     @CEntryPoint(name = "distance_polyglot_thread_unsafe_parse_cache")
-    public static double distanceThreadUnsafe(IsolateThread thread,
+    public static double distanceThreadUnsafeParseCache(IsolateThread thread,
             CCharPointer cLanguage,
             CCharPointer cCode,
             double aLat, double aLong,

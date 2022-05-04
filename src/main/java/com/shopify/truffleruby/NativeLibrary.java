@@ -3,8 +3,6 @@ package com.shopify.truffleruby;
 import org.apache.sis.distance.DistanceUtils;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Value;
 
 public class NativeLibrary {
     public static void main(String[] args) {
