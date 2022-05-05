@@ -18,5 +18,5 @@ int main(int argc, char** argv) {
 
   printf("%.2f km\n", distance_ruby(thread, a_lat, a_long, b_lat, b_long));
 
-  graal_tear_down_isolate(thread);
+  tear_down_isolate(thread);
 }
