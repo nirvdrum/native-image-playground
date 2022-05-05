@@ -116,7 +116,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.shopify.truffleruby.NativeImage</mainClass>
+                            <mainClass>com.nirvdrum.truffleruby.NativeImage</mainClass>
                             <imageName>native-image-playground</imageName>
                         </configuration>
                     </plugin>
@@ -154,7 +154,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.shopify.truffleruby.NativeLibrary</mainClass>
+                            <mainClass>com.nirvdrum.truffleruby.NativeLibrary</mainClass>
                             <imageName>lib${launcher.name}</imageName>
                             <buildArgs>--shared -H:+ParseRuntimeOptions</buildArgs>
                         </configuration>
@@ -220,7 +220,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.shopify.truffleruby.NativeLibraryRuby</mainClass>
+                            <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
                             <buildArgs>--shared --language:ruby</buildArgs>
                         </configuration>
@@ -374,7 +374,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.shopify.truffleruby.NativeLibraryRuby</mainClass>
+                            <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
                             <buildArgs>--shared --language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
@@ -480,7 +480,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.shopify.truffleruby.NativeLibraryRuby</mainClass>
+                            <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
                             <buildArgs>--shared --language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>

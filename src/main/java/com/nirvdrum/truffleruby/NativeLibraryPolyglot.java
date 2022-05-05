@@ -1,4 +1,4 @@
-package com.shopify.truffleruby;
+package com.nirvdrum.truffleruby;
 
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
