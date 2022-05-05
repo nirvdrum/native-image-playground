@@ -273,6 +273,7 @@
                             <executable>clang</executable>
                             <workingDirectory>${project.build.directory}</workingDirectory>
                             <arguments>
+                                <argument>-I${project.build.sourceDirectory}/../c/includes</argument>
                                 <argument>-I${project.build.directory}</argument>
                                 <argument>-I${java.home}/lib/polyglot</argument>
                                 <argument>-L${project.build.directory}</argument>
@@ -282,6 +283,48 @@
                                 <argument>-lpolyglot</argument>
                                 <argument>-o${project.build.directory}/${launcher.name}</argument>
                                 <argument>${project.build.sourceDirectory}/../c/${launcher.name}/${launcher.name}.c</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>jni-libjvm-polyglot</id>
+            <properties>
+                <launcher.name>jni-libjvm-polyglot-runner</launcher.name>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>Build Launcher</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>clang++</executable>
+                            <workingDirectory>${project.build.directory}</workingDirectory>
+                            <arguments>
+                                <argument>-I${project.build.sourceDirectory}/../c/includes</argument>
+                                <argument>-I${project.build.directory}</argument>
+                                <argument>-I${java.home}/include</argument>
+                                <argument>-I${java.home}/include/darwin</argument>
+                                <argument>-L${project.build.directory}</argument>
+                                <argument>-L${java.home}/lib/server</argument>
+                                <argument>-Wl,-rpath</argument>
+                                <argument>${java.home}/lib/server</argument>
+                                <argument>-ljvm</argument>
+                                <argument>-o${project.build.directory}/${launcher.name}</argument>
+                                <argument>${project.build.sourceDirectory}/../cxx/${launcher.name}/${launcher.name}.cxx</argument>
                             </arguments>
                         </configuration>
                     </plugin>
