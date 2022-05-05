@@ -318,6 +318,7 @@
                                 <argument>-I${project.build.directory}</argument>
                                 <argument>-I${java.home}/include</argument>
                                 <argument>-I${java.home}/include/darwin</argument>
+                                <argument>-I${java.home}/include/linux</argument>
                                 <argument>-L${project.build.directory}</argument>
                                 <argument>-L${java.home}/lib/server</argument>
                                 <argument>-Wl,-rpath</argument>
@@ -387,6 +388,7 @@
                                 <argument>-I${project.build.directory}</argument>
                                 <argument>-I${java.home}/include</argument>
                                 <argument>-I${java.home}/include/darwin</argument>
+                                <argument>-I${java.home}/include/linux</argument>
                                 <argument>-I${java.home}/lib/polyglot</argument>
                                 <argument>-L${project.build.directory}</argument>
                                 <argument>-L${java.home}/lib/polyglot</argument>
