@@ -1,7 +1,7 @@
 #ifndef __POLYGLOT_SCRIPTS_H
 #define __POLYGLOT_SCRIPTS_H
 
-const char* JS_HAVERSTEIN_DISTANCE =
+const char* JS_HAVERSINE_DISTANCE =
   "const EARTH_RADIUS = 6371;\n"
   "(a_lat, a_long, b_lat, b_long) => {\n"
   "    const a_lat_radians = a_lat * Math.PI / 180;\n"
@@ -15,7 +15,7 @@ const char* JS_HAVERSTEIN_DISTANCE =
   "    return EARTH_RADIUS * angular_distance;\n"
   "}";
 
-const char* RUBY_HAVERSTEIN_DISTANCE =
+const char* RUBY_HAVERSINE_DISTANCE =
   "EARTH_RADIUS = 6371\n"
   "->(a_lat, a_long, b_lat, b_long) do\n"
   "    a_lat_radians = a_lat * Math::PI / 180\n"

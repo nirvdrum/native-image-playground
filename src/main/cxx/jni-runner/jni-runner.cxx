@@ -28,13 +28,13 @@ int main(int argc, char** argv) {
   const char* code = NULL;
   switch (language[0]) {
     case 'j':
-      code = JS_HAVERSTEIN_DISTANCE;
+      code = JS_HAVERSINE_DISTANCE;
       break;
     case 'r':
-      code = RUBY_HAVERSTEIN_DISTANCE;
+      code = RUBY_HAVERSINE_DISTANCE;
       break;
     default:
-      fprintf(stderr, "Haverstein distance code is not provided for '%s'\n", language);
+      fprintf(stderr, "Haversine distance code is not provided for '%s'\n", language);
       exit(1);
   }
 

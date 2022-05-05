@@ -18,9 +18,9 @@ public class NativeLibraryRuby {
                 .allowExperimentalOptions(true)
                 .option("ruby.no-home-provided", "true")
                 .build()) {
-            final Value haversteinDistance = context.eval("ruby", PolyglotScripts.getHaversteinRuby());
+            final Value haversineDistance = context.eval("ruby", PolyglotScripts.getHaversineRuby());
 
-            final Value ret = haversteinDistance.execute(a_lat, a_long, b_lat, b_long);
+            final Value ret = haversineDistance.execute(a_lat, a_long, b_lat, b_long);
 
             return ret.asDouble();
         }
