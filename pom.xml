@@ -299,7 +299,7 @@
         <profile>
             <id>jni-libjvm-polyglot</id>
             <properties>
-                <launcher.name>jni-libjvm-polyglot-runner</launcher.name>
+                <launcher.name>jni-runner</launcher.name>
             </properties>
             <build>
                 <plugins>
@@ -342,7 +342,7 @@
         <profile>
             <id>jni-native</id>
             <properties>
-                <launcher.name>jni-libjvm-polyglot-runner</launcher.name>
+                <launcher.name>jni-runner</launcher.name>
             </properties>
             <build>
                 <plugins>
