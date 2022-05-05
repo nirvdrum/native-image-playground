@@ -1,4 +1,4 @@
-package com.shopify.truffleruby;
+package com.nirvdrum.truffleruby;
 
 import org.apache.sis.distance.DistanceUtils;
 
