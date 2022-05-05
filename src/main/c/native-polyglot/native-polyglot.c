@@ -1,24 +1,31 @@
-#include <stdlib.h>
-#include <stdio.h>
-
 #include <polyglot_api.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "polyglot_scripts.h"
 
-#define TO_POLY_DOUBLE(thread, context, value) ({ poly_value result = NULL; poly_create_double(thread, context, value, &result); result; })
+#define TO_POLY_DOUBLE(thread, context, value)           \
+  ({                                                     \
+    poly_value result = NULL;                            \
+    poly_create_double(thread, context, value, &result); \
+    result;                                              \
+  })
 
 int main(int argc, char **argv) {
   if (argc != 6) {
-    fprintf(stderr, "Usage: %s <language>[js|ruby] <lat1> <long1> <lat2> <long2>\n", argv[0]);
+    fprintf(stderr,
+            "Usage: %s <language>[js|ruby] <lat1> <long1> <lat2> <long2>\n",
+            argv[0]);
     exit(1);
   }
 
-  char* language = argv[1];
-  double a_lat   = strtod(argv[2], NULL);
-  double a_long  = strtod(argv[3], NULL);
-  double b_lat   = strtod(argv[4], NULL);
-  double b_long  = strtod(argv[5], NULL);
+  char *language = argv[1];
+  double a_lat = strtod(argv[2], NULL);
+  double a_long = strtod(argv[3], NULL);
+  double b_lat = strtod(argv[4], NULL);
+  double b_long = strtod(argv[5], NULL);
 
-  const char* code = NULL;
+  const char *code = NULL;
   switch (language[0]) {
     case 'j':
       code = JS_HAVERSINE_DISTANCE;
@@ -27,7 +34,8 @@ int main(int argc, char **argv) {
       code = RUBY_HAVERSINE_DISTANCE;
       break;
     default:
-      fprintf(stderr, "Haversine distance code is not provided for '%s'\n", language);
+      fprintf(stderr, "Haversine distance code is not provided for '%s'\n",
+              language);
       exit(1);
   }
 
@@ -52,7 +60,8 @@ int main(int argc, char **argv) {
 
   poly_value haversine_distance_function = NULL;
 
-  if (poly_context_eval(thread, context, language, "eval", code, &haversine_distance_function) != poly_ok) {
+  if (poly_context_eval(thread, context, language, "eval", code,
+                        &haversine_distance_function) != poly_ok) {
     fprintf(stderr, "poly_context_eval error\n");
 
     const poly_extended_error_info *error;
@@ -71,14 +80,14 @@ int main(int argc, char **argv) {
 
   if (can_execute) {
     poly_value haversine_distance_args[] = {
-      TO_POLY_DOUBLE(thread, context, a_lat),
-      TO_POLY_DOUBLE(thread, context, a_long),
-      TO_POLY_DOUBLE(thread, context, b_lat),
-      TO_POLY_DOUBLE(thread, context, b_long)
-    };
+        TO_POLY_DOUBLE(thread, context, a_lat),
+        TO_POLY_DOUBLE(thread, context, a_long),
+        TO_POLY_DOUBLE(thread, context, b_lat),
+        TO_POLY_DOUBLE(thread, context, b_long)};
 
     poly_value result = NULL;
-    if (poly_value_execute(thread, haversine_distance_function, haversine_distance_args, 4, &result) != poly_ok) {
+    if (poly_value_execute(thread, haversine_distance_function,
+                           haversine_distance_args, 4, &result) != poly_ok) {
       fprintf(stderr, "poly_value_execute error\n");
 
       const poly_extended_error_info *error;
@@ -97,7 +106,10 @@ int main(int argc, char **argv) {
 
     printf("%.2f km\n", distance);
   } else {
-    fprintf(stderr, "The Haversine distance code block for '%s' is not executable. Did you return a function?\n", language);
+    fprintf(stderr,
+            "The Haversine distance code block for '%s' is not executable. Did "
+            "you return a function?\n",
+            language);
     goto exit_scope;
   }
 
@@ -121,4 +133,3 @@ exit_isolate:
   poly_tear_down_isolate(thread);
   return 1;
 }
-

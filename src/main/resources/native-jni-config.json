@@ -31,5 +31,17 @@
       {"name":"asDouble","parameterTypes":[] },
       {"name":"execute","parameterTypes":["java.lang.Object[]"] }
     ]
+  },
+  {
+    "name":"com.shopify.truffleruby.NativeLibrary",
+    "methods":[
+      {"name":"distance","parameterTypes":["org.graalvm.nativeimage.IsolateThread","double","double","double","double"]}
+    ]
+  },
+  {
+    "name":"com.shopify.truffleruby.NativeLibraryRuby",
+    "methods":[
+      {"name":"distance","parameterTypes":["org.graalvm.nativeimage.IsolateThread","double","double","double","double"]}
+    ]
   }
 ]
