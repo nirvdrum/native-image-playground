@@ -1,0 +1,35 @@
+[
+  {
+    "name":"java.lang.Boolean",
+    "methods":[{"name":"getBoolean","parameterTypes":["java.lang.String"] }]
+  },
+  {
+    "name":"java.lang.Double",
+    "methods":[{"name":"valueOf","parameterTypes":["double"] }]
+  },
+  {
+    "name":"java.lang.String"
+  },
+  {
+    "name":"org.graalvm.polyglot.Context",
+    "methods":[
+      {"name":"eval","parameterTypes":["java.lang.String","java.lang.CharSequence"] },
+      {"name":"newBuilder","parameterTypes":["java.lang.String[]"] }
+    ]
+  },
+  {
+    "name":"org.graalvm.polyglot.Context$Builder",
+    "methods":[
+      {"name":"allowExperimentalOptions","parameterTypes":["boolean"] },
+      {"name":"build","parameterTypes":[] },
+      {"name":"option","parameterTypes":["java.lang.String","java.lang.String"] }
+    ]
+  },
+  {
+    "name":"org.graalvm.polyglot.Value",
+    "methods":[
+      {"name":"asDouble","parameterTypes":[] },
+      {"name":"execute","parameterTypes":["java.lang.Object[]"] }
+    ]
+  }
+]

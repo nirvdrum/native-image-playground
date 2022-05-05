@@ -122,6 +122,7 @@ like. The list of profiles are:
     * native-library-ruby: A shared library written in Java + Ruby
     * native-polyglot: Uses libpolyglot to execute JS and Ruby from a launcher program
     * jni-libjvm-polyglot: Uses JNI and Truffle polyglot API to execute JS and Ruby via libjvm loaded from a launcher program
+    * jni-native: Uses JNI and Truffle polyglot API to execute JS and Ruby via a native image shared library loaded from a launcher program
 
 To build any of these profiles, you run:
 
@@ -272,6 +273,24 @@ any Ruby code.
 
 ```
 $ mvn -P jni-libjvm-polyglot -D skipTests=true clean package
+$ ./target/jni-libjvm-polyglot-runner ruby 51.507222 -0.1275 40.7127 -74.0059
+5570.25 km
+$ ./target/jni-libjvm-polyglot-runner js 51.507222 -0.1275 40.7127 -74.0059
+5570.25 km
+```
+
+### Profile: jni-native
+
+The _jni-native_ profile builds a shared library using native image that embeds both Graal.js and TruffleRuby, allowing
+execution of code in both languages using the Truffle polyglot API. The profile also builds a C++ launcher that uses
+JNI to execute code within that library just as if it were libjvm, the standard approach to invoking Java code from an
+external application. Once loaded, the launcher program uses Truffle's Java-based polyglot API to call JavaScript and Ruby
+implementations of the Haverstein distance algorithm. While this build does not use code built by GraalVM's native image
+tool, it still requires using `gu install ruby` to install the TruffleRuby JAR, which is then loaded for execution of
+any Ruby code.
+
+```
+$ mvn -P jni-native -D skipTests=true clean package
 $ ./target/jni-libjvm-polyglot-runner ruby 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 $ ./target/jni-libjvm-polyglot-runner js 51.507222 -0.1275 40.7127 -74.0059
