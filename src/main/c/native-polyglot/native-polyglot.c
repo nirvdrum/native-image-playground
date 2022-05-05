@@ -1,0 +1,151 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <polyglot_api.h>
+
+#define TO_POLY_DOUBLE(thread, context, value) ({ poly_value result = NULL; poly_create_double(thread, context, value, &result); result; })
+
+const char* JS_HAVERSTEIN_DISTANCE =
+  "const EARTH_RADIUS = 6371;\n"
+  "(a_lat, a_long, b_lat, b_long) => {\n"
+  "    const a_lat_radians = a_lat * Math.PI / 180;\n"
+  "    const a_long_radians = a_long * Math.PI / 180;\n"
+  "    const b_lat_radians = b_lat * Math.PI / 180;\n"
+  "    const b_long_radians = b_long * Math.PI / 180;\n"
+  "    const angular_distance = Math.acos(\n"
+  "        Math.sin(a_lat_radians) * Math.sin(b_lat_radians) +\n"
+  "        Math.cos(a_lat_radians) * Math.cos(b_lat_radians) *\n"
+  "        Math.cos(a_long_radians - b_long_radians));\n"
+  "    return EARTH_RADIUS * angular_distance;\n"
+  "}";
+
+const char* RUBY_HAVERSTEIN_DISTANCE =
+  "EARTH_RADIUS = 6371\n"
+  "->(a_lat, a_long, b_lat, b_long) do\n"
+  "    a_lat_radians = a_lat * Math::PI / 180\n"
+  "    a_long_radians = a_long * Math::PI / 180\n"
+  "    b_lat_radians = b_lat * Math::PI / 180\n"
+  "    b_long_radians = b_long * Math::PI / 180\n"
+  "    angular_distance = Math::acos(\n"
+  "        Math::sin(a_lat_radians) * Math::sin(b_lat_radians) +\n"
+  "        Math::cos(a_lat_radians) * Math::cos(b_lat_radians) *\n"
+  "        Math::cos(a_long_radians - b_long_radians))\n"
+  "    EARTH_RADIUS * angular_distance\n"
+  "end";
+
+int main(int argc, char **argv) {
+  if (argc != 6) {
+    fprintf(stderr, "Usage: %s <language>[js|ruby] <lat1> <long1> <lat2> <long2>\n", argv[0]);
+    exit(1);
+  }
+
+  char* language = argv[1];
+  double a_lat   = strtod(argv[2], NULL);
+  double a_long  = strtod(argv[3], NULL);
+  double b_lat   = strtod(argv[4], NULL);
+  double b_long  = strtod(argv[5], NULL);
+
+  const char* code = NULL;
+  switch (language[0]) {
+    case 'j':
+      code = JS_HAVERSTEIN_DISTANCE;
+      break;
+    case 'r':
+      code = RUBY_HAVERSTEIN_DISTANCE;
+      break;
+    default:
+      fprintf(stderr, "Haverstein distance code is not provided for '%s'\n", language);
+      exit(1);
+  }
+
+#ifdef DEBUG
+  printf("Code fragment for '%s':\n%s\n", language, code);
+#endif
+
+  poly_isolate isolate = NULL;
+  poly_thread thread = NULL;
+
+  if (poly_create_isolate(NULL, &isolate, &thread) != poly_ok) {
+    fprintf(stderr, "poly_create_isolate error\n");
+    return 1;
+  }
+
+  poly_context context = NULL;
+
+  if (poly_create_context(thread, NULL, 0, &context) != poly_ok) {
+    fprintf(stderr, "poly_create_context error\n");
+    goto exit_isolate;
+  }
+
+  poly_value haverstein_distance_function = NULL;
+
+  if (poly_context_eval(thread, context, language, "eval", code, &haverstein_distance_function) != poly_ok) {
+    fprintf(stderr, "poly_context_eval error\n");
+
+    const poly_extended_error_info *error;
+
+    if (poly_get_last_error_info(thread, &error) != poly_ok) {
+      fprintf(stderr, "poly_get_last_error_info error\n");
+      goto exit_scope;
+    }
+
+    fprintf(stderr, "%s\n", error->error_message);
+    goto exit_scope;
+  }
+
+  bool can_execute = false;
+  poly_value_can_execute(thread, haverstein_distance_function, &can_execute);
+
+  if (can_execute) {
+    poly_value haverstein_distance_args[] = {
+      TO_POLY_DOUBLE(thread, context, a_lat),
+      TO_POLY_DOUBLE(thread, context, a_long),
+      TO_POLY_DOUBLE(thread, context, b_lat),
+      TO_POLY_DOUBLE(thread, context, b_long)
+    };
+
+    poly_value result = NULL;
+    if (poly_value_execute(thread, haverstein_distance_function, haverstein_distance_args, 4, &result) != poly_ok) {
+      fprintf(stderr, "poly_value_execute error\n");
+
+      const poly_extended_error_info *error;
+
+      if (poly_get_last_error_info(thread, &error) != poly_ok) {
+        fprintf(stderr, "poly_get_last_error_info error\n");
+        goto exit_scope;
+      }
+
+      fprintf(stderr, "%s\n", error->error_message);
+      goto exit_scope;
+    }
+
+    double distance;
+    poly_value_as_double(thread, result, &distance);
+
+    printf("%.2f km\n", distance);
+  } else {
+    fprintf(stderr, "The Haverstein distance code block for '%s' is not executable. Did you return a function?\n", language);
+    goto exit_scope;
+  }
+
+  if (poly_context_close(thread, context, true) != poly_ok) {
+    fprintf(stderr, "poly_context_close error\n");
+    goto exit_isolate;
+  }
+
+  if (poly_tear_down_isolate(thread) != poly_ok) {
+    fprintf(stderr, "poly_tear_down_isolate error\n");
+    return 1;
+  }
+
+  return 0;
+
+exit_scope:
+  poly_close_handle_scope(thread);
+exit_context:
+  poly_context_close(thread, context, true);
+exit_isolate:
+  poly_tear_down_isolate(thread);
+  return 1;
+}
+
