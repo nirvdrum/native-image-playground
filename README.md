@@ -1,5 +1,22 @@
 # Native Image Playground
 
+## Overview
+
+The Native Image Playground project is a series of examples for illustrating how to invoke Java code, including
+Truffle-based languages, in a variety of embedding scenarios. There are two primary approaches taken: 1) load the JVM
+in a process via libjvm and execute code using the Java Native Interface (JNI) [Invocation API](https://docs.oracle.com/en/java/javase/17/docs/specs/jni/invocation.html);
+and 2) use the GraalVM Native Image tool to create native shared libraries of ahead-of-time compiled Java code (including
+Truffle-based languages), which can then be called from an application using either JNI or exported function symbols.
+
+To keep things consistent, the same workload is used in all examples: a geospatial algorithm known as the [Haversine distance](https://en.wikipedia.org/wiki/Haversine_formula).
+This particular algorithm was chosen because the examples here are a spiritual successor to the [Top 10 Things To Do With GraalVM](https://medium.com/graalvm/graalvm-ten-things-12d9111f307d)
+article written by [Chris Seaton](https://chrisseaton.com/). As a minor note, the Haversine distance formula used here
+comes from the Apache SIS geospatial library. In the time since Chris wrote his post, it was discovered that the implementation
+in Apache SIS was incorrect. The library has deprecated the function in favor of a more complex solution. Despite that,
+this project continues to use the older, incorrect implementation. It makes for a good comparison to Chris's article
+and the original Haversine distance formula was a compact, mathematical equation that can be represented compactly with
+machine code.
+
 ## Prerequisites
 
 In order to build this project you will need to have clang and clang++ installed, along with a [GraalVM distribution](https://graalvm.org/)
@@ -140,8 +157,8 @@ code in there that you're not comfortable losing.
 
 ### Profile: native-image
 
-The _native-library_ profile builds a Java application that computes the Haversine distance between two coordinates. The
-resulting executable must be called with the four coordinates (aLatitute, aLongitude, bLatitude, bLongitude).
+The _native-image_ profile builds a Java application that calls into the Apache SIS library to computer the Haversine
+distance of two coordinates. All functionality is written in Java and is compiled to machine code in a static binary.
 
 ```
 $ mvn -P native-image -D skipTests=true package
@@ -151,11 +168,14 @@ $ ./target/native-image-playground 51.507222 -0.1275 40.7127 -74.0059
 
 ### Profile: native-library
 
-The _native-library_ profile builds a Java class file into a native shared library along with a corresponding set
-of C header files to compile against or serve as documentation for any sort of dynamic loading (e.g., Ruby's FFI).
-The native library includes a single function named `distance`, which computes the Haverstein distance between two
-coordinates. The profile also compiles a launcher program written in C which loads in the shared library and passes
-arguments from the launcher to the library to computer the Haverstein distance.
+The _native-library_ profile builds a Java class file into a native shared library. Much like with the _native-image_
+profile, the Haversine distance function comes from the Apache SIS library. However, this time the function is exported
+and available to external callers. To make calling the function easier, Native Image will also generate a header file
+with a function declaration for each function declared with `@CEntryPoint`. In this case, the exported function of note
+is named `distance`.
+
+Additionally, the Native Image Playground includes a launcher application written in C to demonstrate how to call that
+function. The resulting binary is named `native-library-runner`.
 
 ```
 $ mvn -P native-library -D skipTests=true clean package
@@ -165,12 +185,10 @@ $ > ./target/native-library-runner 51.507222 -0.1275 40.7127 -74.0059
 
 ### Profile: native-library-ruby
 
-The _native-library-ruby_ profiles builds a Java class file into a native shared library along with a corresponding set
-of C header files to compile against or serve as documentation for any sort of dynamic loading (e.g., Ruby's FFI).
-The native library includes a single function named `distance`, which computes the Haverstein distance between two
-coordinates. The `distance` function uses Truffle's polyglot API to call into TruffleRuby, which is what ultimately
-implements the Haverstein distance function. The profile also compiles a launcher program written in C which loads in
-the shared library and passes arguments from the launcher to the library to computer the Haverstein distance.
+The _native-library-ruby_ profile is quite similar to the _native-library_ profile. In this case, the profile builds a
+native shared library that exports a `distance_ruby` function, which calls a port of Apache SIS's Haversine formula to
+Ruby. The Ruby code is executed using TruffleRuby, which is embedded in the shared library (i.e., there is no external
+dependency). TruffleRuby is invoked via Truffle's polyglot API in Java and the function is exposed with `@CEntryPoint`.
 
 ```
 $ mvn -P native-library-ruby -D skipTests=true clean package
@@ -181,9 +199,9 @@ $ ./target/native-library-runner-ruby 51.507222 -0.1275 40.7127 -74.0059
 ### Profile: native-polyglot
 
 The _native-polyglot_ profile builds a C launcher that uses GraalVM's _libpolyglot_ and the native polyglot API to call
-JavaScript and Ruby implementations of the Haverstein distance algorithm. _libpolyglot_ must be rebuilt when a new
-GraalVM language is installed using `gu install`. The build is not automatically triggered and while JavaScript is
-installed in GraalVM by default, _libpolyglot_ is not built by default. To rebuild _libpolyglot_, run:
+JavaScript and Ruby implementations of the Haversine distance algorithm. _libpolyglot_ must be manually rebuilt when a
+new GraalVM language is installed using `gu install`. While JavaScript is installed in GraalVM by default, _libpolyglot_
+still must be built before its first usage. To rebuild _libpolyglot_, run:
 
 ```
 $ gu rebuild libpolyglot
@@ -252,7 +270,7 @@ there's a change to the `@CEntryPoint` set of methods.
 Once _libployglot_ is built, you can compile and invoke the C launcher. There is no Java code or build process necessary
 for this profile. _libpolyglot_ exposes all of the functionality needed to call into a Truffle language. Moreover, the
 native polyglot API allows sending polyglot messages to a Truffle language without needing to use Truffle Java-based API.
-The launcher script provides implementations of the Haverstein distance formula in JavaScript and Ruby, mostly to
+The launcher script provides implementations of the Haversine distance formula in JavaScript and Ruby, mostly to
 illustrate how _libpolyglot_ supports multiple languages. When invoking the launcher you must provide the language to
 use as the first argument. Acceptable values are "js" and "ruby" (case-sensitive).
 
@@ -266,11 +284,12 @@ $ ./target/native-polyglot js 51.507222 -0.1275 40.7127 -74.0059
 
 ### Profile: jni-libjvm-polyglot
 
-The _jni-libjvm-polyglot_ profile builds a C++ launcher that uses JNI to load a copy of the JVM as a shared
-library. Once loaded, the launcher program uses Truffle's Java-based polyglot API to call JavaScript and Ruby
-implementations of the Haverstein distance algorithm. While this build does not use code built by GraalVM's native image
-tool, it still requires using `gu install ruby` to install the TruffleRuby JAR, which is then loaded for execution of
-any Ruby code.
+The _jni-libjvm-polyglot_ profile builds a C++ launcher that uses JNI to load a copy of the JVM as a shared library.
+Once loaded, the launcher program uses Truffle's Java-based polyglot API to call JavaScript and Ruby implementations of
+the Haversine distance algorithm (both ports of the Apache SIS Java implementation). While this profile does not use code
+built by GraalVM's native image tool, it still requires using `gu install ruby` to install the TruffleRuby JAR, which is
+then loaded for execution of any Ruby code. Graal.js is bundled with the GraalVM distribution, so it is available
+out-of-the box.
 
 ```
 $ mvn -P jni-libjvm-polyglot -D skipTests=true clean package
@@ -282,13 +301,18 @@ $ ./target/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
 
 ### Profile: jni-native
 
-The _jni-native_ profile builds a shared library using native image that embeds both Graal.js and TruffleRuby, allowing
-execution of code in both languages using the Truffle polyglot API. The profile also builds a C++ launcher that uses
-JNI to execute code within that library just as if it were libjvm, the standard approach to invoking Java code from an
-external application. Once loaded, the launcher program uses Truffle's Java-based polyglot API to call JavaScript and Ruby
-implementations of the Haverstein distance algorithm. While this build does not use code built by GraalVM's native image
-tool, it still requires using `gu install ruby` to install the TruffleRuby JAR, which is then loaded for execution of
-any Ruby code.
+The _jni-native_ profile is very similar to the _jni-libjvm-polyglot_. In fact, they share the same C++-based launcher.
+What changes is the libraries the launcher is linked against and consequently, the execution environment. Whereas the
+_jni-libjvm-polyglot_ profile loads a standard JVM into memory, the _jni-native_ profile uses a shared library built
+using the GraalVM Native Image tool, just like was used in the _native-library-ruby_ profile. While not a JVM, the
+shared library still adheres to the Java Native Interface (NI) Invocation API. Here, creating a JVM corresponds to
+creating a Graal isolate. In contrast to the other library examples that rely on functions exported with `@CEntryPoint`,
+this launcher uses JNI to call JavaScript and Ruby implementations of the Haversine distance algorithm using the
+Java-based Truffle polyglot API.
+
+As with other shared libraries using Truffle languages, the Truffle languages must already be installed via `gu install`
+in order for them to be linked into the library. If you haven't already done so, you will need to run `gu install ruby`
+(JavaScript support is provided out-of-the box in the GraalVM distribution).
 
 ```
 $ mvn -P jni-native -D skipTests=true clean package
