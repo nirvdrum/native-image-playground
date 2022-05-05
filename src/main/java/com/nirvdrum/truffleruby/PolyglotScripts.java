@@ -1,4 +1,4 @@
-package com.shopify.truffleruby;
+package com.nirvdrum.truffleruby;
 
 public class PolyglotScripts {
     public static String getHaversineRuby() {
