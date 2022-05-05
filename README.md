@@ -136,6 +136,8 @@ like. The list of profiles are:
     * native-polyglot: Uses libpolyglot to execute JS and Ruby from a launcher program
     * jni-libjvm-polyglot: Uses JNI and Truffle polyglot API to execute JS and Ruby via libjvm loaded from a launcher program
     * jni-native: Uses JNI and Truffle polyglot API to execute JS and Ruby via a native image shared library loaded from a launcher program
+    * benchmark-setup: Fetches and builds the Google Benchmark library for running benchmarks
+    * benchmark: Runs benchmarks comparing `@CEntryPoint` and JNI Invocation API calls
 
 To build any of these profiles, you run:
 
@@ -317,3 +319,122 @@ $ ./target-jni-native/jni-runner ruby 51.507222 -0.1275 40.7127 -74.0059
 $ ./target-jni-native/jni-runner js 51.507222 -0.1275 40.7127 -74.0059
 5570.25 km
 ```
+
+### Profile: benchmark-setup
+
+The _benchmark-setup_ profile fetches and builds a copy of the [Google Benchmark](https://github.com/google/benchmark)
+library. The compiled library will be linked into the benchmark runner when the _benchmark_ profile is built. Since the
+benchmark library only needs to be built once and because it's an expensive process, it was broken out from the _benchmark_
+profile.
+
+The _build-google-benchmark.sh_ script at the root of this project does most of the work.  If you want to change the
+version of the library being used, you'll need to modify that script. The generated files will be in the _target/benchmark_
+directory, but the files there are for internal use only.
+
+```
+$ mvn -P benchmark-setup -D skipTests=true clean package
+```
+
+### Profile: benchmark
+
+The _benchmark_ profile builds a benchmark runner that uses the [Google Benchmark](https://github.com/google/benchmark)
+framework to explore performance differences in the various approaches taken in this project to call Java code &mdash;
+and by extension, Truffle interpreters &mdash; from external processes. To do so, the profile invokes Native Image to
+build a native shared library, which is then loaded by the benchmark runner (a C++ application).
+
+In order to build the profile, you must first build the _benchmark-setup_ profile. If you forget to do so, building
+the _benchmark_ profile will error with a message like `fatal error: 'benchmark/benchmark.h' file not found`. The
+_benchmark-setup_ profile only needs to be built once. Its artifacts do not live in the same target directory as the
+benchmarks, so you can clean and rebuild the benchmarks without trashing the benchmark library artifacts.
+
+To build the benchmark runner, you run:
+
+```
+$ mvn -P benchmark -D skipTests=true clean package
+```
+
+The benchmark runner supports several options that influence what is run and how. To see the full list, you can use
+the `--help` option:
+
+```
+$ ./target-benchmark/benchmark-runner --help
+benchmark [--benchmark_list_tests={true|false}]
+          [--benchmark_filter=<regex>]
+          [--benchmark_min_time=<min_time>]
+          [--benchmark_repetitions=<num_repetitions>]
+          [--benchmark_enable_random_interleaving={true|false}]
+          [--benchmark_report_aggregates_only={true|false}]
+          [--benchmark_display_aggregates_only={true|false}]
+          [--benchmark_format=<console|json|csv>]
+          [--benchmark_out=<filename>]
+          [--benchmark_out_format=<json|console|csv>]
+          [--benchmark_color={auto|true|false}]
+          [--benchmark_counters_tabular={true|false}]
+          [--benchmark_context=<key>=<value>,...]
+          [--benchmark_time_unit={ns|us|ms|s}]
+          [--v=<verbosity>]
+```
+
+The options are documented in the Google Benchmark [User Guide](https://github.com/google/benchmark/blob/8d86026c67e41b1f74e67c1b20cc8f73871bc76e/docs/user_guide.md).
+The `--benchmark-filter` option is particularly helpful if you only want to run a sub-set of the benchmarks.
+
+To run all the benchmarks, you can use:
+
+```
+$ ./target-benchmark/benchmark-runner
+```
+
+The simple benchmark invocation is fairly quick and can give you  ballpark figures. When I want to collect performance
+numbers that I want to share, I use a more rigorous configuration. In this case, I always run the benchmarks on dedicated
+hardware running Linux. To help eliminate issues related to CPU throttling, I disable CPU frequency scaling before
+starting the benchmarks. For reasons outlined in the "A Note about Warm-Up" section, I also add some flags to the
+benchmark runner to help ensure each benchmark has warmed up. Finally, I run each benchmark multiple times to help
+diminish the effects of random system events. As an added bonus, the benchmark library will compute and report descriptive
+statistics when multiple benchmark repetitions are used.
+
+```
+$ sudo cpupower frequency-set --governor performance # Disable CPU frequency scaling on Linux
+$ ./target-benchmark/benchmark-runner --benchmark_enable_random_interleaving=true --benchmark_repetitions=3 --benchmark_min_time=30
+$ sudo cpupower frequency-set --governor schedutil # Re-enable CPU frequency scaling on Linux
+```
+
+#### A Note about Warm-Up
+
+The Google Benchmark library has limited control over warming up a benchmark, which is problematic when benchmarking
+something with a JIT compiler as we're doing here. The library runs each benchmark for a specified amount of time and
+tries to determine the ideal number of iterations for that benchmark by running it in a loop for a fixed number of
+iterations. After each round, the library checks if time is still remaining in the window and if so, it bumps the number
+of iterations and runs again, this time for a longer time-slice. Once it determines how many iterations to use for that
+benchmark, it then runs the benchmark again with that iteration count and takes performance measurements. The iteration
+discovery only occurs once &mdash; if you specify multiple repetitions for a benchmark to get more stable values, each
+repetition will use the same discovered iteration count. Alternatively, the benchmark harness can be configured for a
+fixed number of iterations, but this option is not exposed as a runtime configuration value; it must be configured directly
+in the benchmark runner's source code.
+
+The Google Benchmark library allows running setup & destroy functions before each benchmark, which the benchmark runner
+uses to initialize a Graal Isolate. Unfortunately, the setup & destroy methods are run before each iteration in the
+discovery process and then again before each repetition. To help keep everything isolated, the benchmark runner will
+destroy the Graal Isolate in its teardown method. If the library needs to take eight rounds of execution to determine
+the ideal iteration count, then the Graal Isolate will be created and destroyed eight times. Naturally, that complicates
+the JIT process because compiled methods are constantly being discarded. Rather than fight the library, we configure a
+minimum execution time(specified with the `--benchmark_min_time` option with a unit of seconds), which ultimately extends
+the iteration count discovery process and results in a high enough iteration count that should be sufficient for each
+benchmark to fully warm up, even if earlier compiled methods are trashed. Just to reiterate, however, the benchmark library
+is not running a separate warm-up pass and makes no guarantees about benchmark stability. As such, we specify a conservative
+value for the benchmark's minimum execution time, but even then it's possible that the benchmark has not fully warmed up.
+
+Through many executions of the benchmarks with GraalVM 22.1.0, I've decided to move ahead with a 30 second minimum
+execution time. This number is quite conservative as the performance difference in 10s vs 30s is virtually non-existent.
+Since the goal of the benchmarks is to evaluate different mechanisms for calling code packaged up in a Native Image
+shared library, we do want to ensure fairness for each technique. By choosing a larger minimum execution time value, we
+allow for reasonable variance in the warm-up process. On the other hand, if a benchmark is unable to warm up in our
+conservative time window, that's good to know as well. In the case of Native Image binaries, we're concerned with start-up
+time and overall throughput, not just peak performance. If peak performance were all that mattered, we could call into a
+JVM-based GraalVM distribution using the JNI Invocation API.
+
+With all of that said, if the total benchmark time is intolerable, you can rebuild the benchmark runner and set the
+`REUSE_CONTEXT` `#define` value. Enabling that setting will share the Graal Isolate across all runs. It should allow
+methods to warm up in a much shorter amount of time, but benchmark results may be impacted by compilations from other
+benchmarks. You'll probably want to use the `--benchmark_enable_random_interleaving=true` option and run multiple times
+to avoid execution order impacting results. To enable the setting you'll have to modifythe benchmark code or the build
+command in the project's _pom.xml_.
