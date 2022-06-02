@@ -21,9 +21,9 @@ public class NativeLibraryRuby {
             double a_lat, double a_long,
             double b_lat, double b_long) {
 
-            final Value ret = haversineDistance.execute(a_lat, a_long, b_lat, b_long);
+        final Value ret = haversineDistance.execute(a_lat, a_long, b_lat, b_long);
 
-            return ret.asDouble();
+        return ret.asDouble();
     }
 
 }
