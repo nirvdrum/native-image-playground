@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 os=$(uname)
 find_pattern='.*\.(cxx|c|h)$'
