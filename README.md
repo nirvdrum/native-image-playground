@@ -20,9 +20,7 @@ machine code.
 ## Prerequisites
 
 In order to build this project you will need to have clang and clang++ installed, along with a [GraalVM distribution](https://graalvm.org/)
-and [Apache Maven](https://maven.apache.org/). For those on Apple M1 hardware, you will have to run everything listed
-here in a Rosetta session. GraalVM does not currently support M1 natively. Both GraalVM and Maven can be installed with
-[SDKMan!](https://sdkman.io/):
+and [Apache Maven](https://maven.apache.org/). Both GraalVM and Maven can be installed with [SDKMan!](https://sdkman.io/):
 
 ```
 $ sdk install java 22.3.1.r17-grl
