@@ -156,7 +156,8 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibrary</mainClass>
                             <imageName>lib${launcher.name}</imageName>
-                            <buildArgs>--shared -H:+ParseRuntimeOptions</buildArgs>
+                            <sharedLibrary>true</sharedLibrary>
+                            <buildArgs>-H:+ParseRuntimeOptions</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -222,7 +223,8 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
-                            <buildArgs>--shared --language:ruby</buildArgs>
+                            <sharedLibrary>true</sharedLibrary>
+                            <buildArgs>--language:ruby</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -376,7 +378,8 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
-                            <buildArgs>--shared --language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
+                            <sharedLibrary>true</sharedLibrary>
+                            <buildArgs>--language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -482,7 +485,8 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
-                            <buildArgs>--shared --language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
+                            <sharedLibrary>true</sharedLibrary>
+                            <buildArgs>--language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
