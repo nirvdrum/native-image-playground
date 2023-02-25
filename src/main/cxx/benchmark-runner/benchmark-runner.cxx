@@ -38,7 +38,7 @@ static void DoCEntrySetup(const benchmark::State& state) {
     // to the isolate this way. The `_reserved_` prefix on the field names is
     // a clear indication that none of this should be relied upon. With that
     // said, barring an official way of passing JVM options, this approach does
-    // work with GraalVM 22.1.0 Community Edition.
+    // work with GraalVM 22.3.1 Community Edition.
 
     char* args[2] = {(char*)"-XX:+ParseRuntimeOptions",
                      (char*)"-XX:Dump=Truffle:1"};

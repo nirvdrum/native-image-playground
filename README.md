@@ -25,8 +25,8 @@ here in a Rosetta session. GraalVM does not currently support M1 natively. Both 
 [SDKMan!](https://sdkman.io/):
 
 ```
-$ sdk install java 22.1.0.r17-grl
-$ sdk use java 22.1.0.r17-grl
+$ sdk install java 22.3.1.r17-grl
+$ sdk use java 22.3.1.r17-grl
 $ sdk install maven
 ```
 
@@ -35,7 +35,7 @@ to the directory that contains the unpackaged distribution's `bin/` dir. On macO
 the `Contents/Home/` directory, leading to something like:
 
 ```
-export JAVA_HOME=$HOME/dev/bin/graalvm-ce-java17-22.1.0/Contents/Home/
+export JAVA_HOME=$HOME/dev/bin/graalvm-ce-java17-22.3.1/Contents/Home/
 ```
 
 You can also manage the Maven installation on your own. Many popular package managers have a way of installing it.
@@ -50,17 +50,21 @@ packaged as a binary called `gu`. To see which components are available for inst
 ```
 $ gu available
 Downloading: Component catalog from www.graalvm.org
-ComponentId              Version             Component name                Stability                     Origin 
+ComponentId              Version             Component name                Stability                     Origin
 ---------------------------------------------------------------------------------------------------------------------------------
-espresso                 22.1.0              Java on Truffle               Supported                     github.com
-espresso-llvm            22.1.0              Java on Truffle LLVM Java librSupported                     github.com
-llvm-toolchain           22.1.0              LLVM.org toolchain            Supported                     github.com
-native-image             22.1.0              Native Image                  Early adopter                 github.com
-nodejs                   22.1.0              Graal.nodejs                  Supported                     github.com
-python                   22.1.0              Graal.Python                  Experimental                  github.com
-R                        22.1.0              FastR                         Experimental                  github.com
-ruby                     22.1.0              TruffleRuby                   Experimental                  github.com
-wasm                     22.1.0              GraalWasm                     Experimental                  github.com
+espresso                 22.3.1              Java on Truffle               Supported                     github.com
+espresso-llvm            22.3.1              Java on Truffle LLVM Java librSupported                     github.com
+js                       22.3.1              Graal.js                      Supported                     github.com
+llvm                     22.3.1              LLVM Runtime Core             Supported                     github.com
+llvm-toolchain           22.3.1              LLVM.org toolchain            Supported                     github.com
+native-image             22.3.1              Native Image                  Early adopter                 github.com
+native-image-llvm-backend22.3.1              Native Image LLVM Backend     Early adopter (experimental)  github.com
+nodejs                   22.3.1              Graal.nodejs                  Supported                     github.com
+python                   22.3.1              GraalVM Python                Experimental                  github.com
+R                        22.3.1              FastR                         Experimental                  github.com
+ruby                     22.3.1              TruffleRuby                   Experimental                  github.com
+visualvm                 22.3.1              VisualVM                      Experimental                  github.com
+wasm                     22.3.1              GraalWasm                     Experimental                  github.com
 ```
 
 This repository will require the _native-image_ and _ruby_ components.
@@ -71,14 +75,18 @@ Downloading: Component catalog from www.graalvm.org
 Processing Component: Native Image
 Processing Component: TruffleRuby
 Processing Component: LLVM.org toolchain
+Processing Component: LLVM Runtime Core
 Additional Components are required:
-    LLVM.org toolchain (org.graalvm.llvm-toolchain, version 22.1.0), required by: TruffleRuby (org.graalvm.ruby)
+    LLVM.org toolchain (org.graalvm.llvm-toolchain, version 22.3.1), required by: TruffleRuby (org.graalvm.ruby)
+    LLVM Runtime Core (org.graalvm.llvm, version 22.3.1), required by: TruffleRuby (org.graalvm.ruby)
 Downloading: Component native-image: Native Image from github.com
 Downloading: Component ruby: TruffleRuby from github.com
 Downloading: Component org.graalvm.llvm-toolchain: LLVM.org toolchain from github.com
-Installing new component: LLVM.org toolchain (org.graalvm.llvm-toolchain, version 22.1.0)
-Installing new component: Native Image (org.graalvm.native-image, version 22.1.0)
-Installing new component: TruffleRuby (org.graalvm.ruby, version 22.1.0)
+Downloading: Component org.graalvm.llvm: LLVM Runtime Core from github.com
+Installing new component: LLVM Runtime Core (org.graalvm.llvm, version 22.3.1)
+Installing new component: LLVM.org toolchain (org.graalvm.llvm-toolchain, version 22.3.1)
+Installing new component: Native Image (org.graalvm.native-image, version 22.3.1)
+Installing new component: TruffleRuby (org.graalvm.ruby, version 22.3.1)
 
 IMPORTANT NOTE:
 ---------------
@@ -86,16 +94,7 @@ The Ruby openssl C extension needs to be recompiled on your system to work with 
 First, make sure TruffleRuby's dependencies are installed, which are described at:
   https://github.com/oracle/truffleruby/blob/master/README.md#dependencies
 Then run the following command:
-        /home/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/languages/ruby/lib/truffle/post_install_hook.sh
-
-
-IMPORTANT NOTE:
----------------
-The set of GraalVM components that provide language implementations has changed. The Polyglot native image and polyglot native C library may be out of sync: 
-- new languages may not be accessible
-- removed languages may cause a native binary to fail due to missing resources or libraries.
-To rebuild and refresh the native binaries, use the following command:
-        /home/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/bin/gu rebuild-images
+        /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/languages/ruby/lib/truffle/post_install_hook.sh
 ```
 
 Please pay attention to the output. There are two things of note here. The first is that the TruffleRuby native image
@@ -104,7 +103,7 @@ that native image, you'll likely get a confusing error message telling you the O
 the output above, we're prompted to run:
 
 ```
-$ $HOME/.sdkman/candidates/java/22.1.0.r17-grl/languages/ruby/lib/truffle/post_install_hook.sh
+$ $HOME/.sdkman/candidates/java/22.3.1.r17-grl/languages/ruby/lib/truffle/post_install_hook.sh
 ```
 
 The recompilation of the OpenSSL extension will take a few minutes. If you're certain you won't be using the _openssl_
@@ -206,58 +205,60 @@ Building libpolyglot...
 ========================================================================================================================
 GraalVM Native Image: Generating 'libpolyglot' (shared library)...
 ========================================================================================================================
-[1/7] Initializing...                                                                                   (11.9s @ 0.24GB)
- Version info: 'GraalVM 22.1.0 Java 17 CE'
- C compiler: cc (apple, x86_64, 13.1.6)
+[1/7] Initializing...                                                                                    (6.1s @ 0.32GB)
+ Version info: 'GraalVM 22.3.1 Java 17 CE'
+ Java version info: '17.0.6+10-jvmci-22.3-b13'
+ C compiler: gcc (linux, x86_64, 12.2.0)
  Garbage collector: Serial GC
- 1 user-provided feature(s)
-  - org.graalvm.polyglot.nativeapi.PolyglotNativeAPIFeature
-[2/7] Performing analysis...  [*************]                                                          (134.2s @ 3.94GB)
-  33,856 (97.21%) of 34,826 classes reachable
-  54,383 (65.95%) of 82,465 fields reachable
- 169,893 (75.25%) of 225,778 methods reachable
-  25,788 (11.42%) of 225,778 methods included for runtime compilation
-     418 classes,   104 fields, and 1,963 methods registered for reflection
-      64 classes,    76 fields, and    55 methods registered for JNI access
-[3/7] Building universe...                                                                               (7.1s @ 5.15GB)
-[4/7] Parsing methods...      [****]                                                                    (20.3s @ 3.69GB)
-[5/7] Inlining methods...     [*****]                                                                   (15.2s @ 4.36GB)
-[6/7] Compiling methods...    [********]                                                                (72.3s @ 5.72GB)
-[7/7] Creating image...                                                                                 (31.4s @ 3.47GB)
-  87.32MB (32.47%) for code area:  140,712 compilation units
- 164.05MB (61.00%) for image heap:  23,774 classes and 1,493,200 objects
-  17.56MB ( 6.53%) for other data
- 268.93MB in total
+ 4 user-specific feature(s)
+ - com.oracle.svm.truffle.TruffleBaseFeature: Provides base support for Truffle
+ - com.oracle.svm.truffle.TruffleFeature: Enables compilation of Truffle ASTs to machine code
+ - org.graalvm.home.HomeFinderFeature: Finds GraalVM paths and its version number
+ - org.graalvm.polyglot.nativeapi.PolyglotNativeAPIFeature
+[2/7] Performing analysis...  [*********]                                                               (43.1s @ 4.54GB)
+  28,540 (96.68%) of 29,520 classes reachable
+  43,215 (65.74%) of 65,738 fields reachable
+ 138,638 (73.16%) of 189,505 methods reachable
+  17,223 ( 9.09%) of 189,505 methods included for runtime compilation
+     408 classes,   102 fields, and 2,113 methods registered for reflection
+      65 classes,    75 fields, and    56 methods registered for JNI access
+       4 native libraries: dl, pthread, rt, z
+[3/7] Building universe...                                                                               (3.6s @ 2.34GB)
+[4/7] Parsing methods...      [***]                                                                      (6.9s @ 5.31GB)
+[5/7] Inlining methods...     [****]                                                                     (4.6s @ 3.21GB)
+[6/7] Compiling methods...    [*****]                                                                   (31.6s @ 3.83GB)
+[7/7] Creating image...                                                                                 (14.9s @ 4.39GB)
+  85.45MB (39.16%) for code area:   110,354 compilation units
+ 125.48MB (57.50%) for image heap:1,368,750 objects and 658 resources
+   7.30MB ( 3.35%) for other data
+ 218.24MB in total
 ------------------------------------------------------------------------------------------------------------------------
 Top 10 packages in code area:                               Top 10 object types in image heap:
-   4.88MB com.oracle.truffle.js.builtins                      31.85MB byte[] for general heap data
-   1.74MB com.oracle.truffle.js.nodes.access                  27.13MB byte[] for code metadata
-   1.72MB com.oracle.truffle.js.nodes.binary                  18.65MB byte[] for graph encodings
-   1.63MB sun.security.ssl                                     9.83MB java.lang.Class
-   1.47MB com.oracle.truffle.polyglot                          7.34MB byte[] for java.lang.String
-   1.44MB org.truffleruby.interop                              7.02MB java.lang.String
-   1.20MB java.util                                            4.45MB char[]
-   1.17MB org.truffleruby.core.array                           3.58MB com.oracle.svm.graal.meta.SubstrateMethod
-   1.14MB com.oracle.truffle.llvm.runtime.nodes.op             3.10MB int[]
-   1.11MB org.truffleruby.core.string                          2.96MB java.lang.Object[]
-      ... 711 additional packages                                 ... 9308 additional object types
-                                           (use GraalVM Dashboard to see all)
+   2.26MB org.truffleruby.core.string                         24.61MB byte[] for code metadata
+   2.09MB org.truffleruby.core.array                          11.47MB byte[] for graph encodings
+   1.69MB com.oracle.truffle.polyglot                          8.09MB java.lang.Class
+   1.67MB org.truffleruby.core.numeric                         6.77MB byte[] for general heap data
+   1.63MB com.oracle.truffle.llvm.runtime.nodes.cast           6.62MB byte[] for java.lang.String
+   1.59MB sun.security.ssl                                     6.38MB java.lang.String
+   1.59MB com.oracle.truffle.llvm.runtime.nodes.op             4.45MB char[]
+   1.58MB com.oracle.truffle.api.strings                       3.51MB int[]
+   1.57MB org.truffleruby.interop                              3.04MB byte[] for embedded resources
+   1.33MB com.oracle.truffle.llvm.runtime.nodes.asm            2.48MB java.lang.Object[]
+  67.62MB for 672 more packages                               47.58MB for 8361 more object types
 ------------------------------------------------------------------------------------------------------------------------
-                       34.9s (10.9% of total time) in 95 GCs | Peak RSS: 7.71GB | CPU load: 3.31
+                        9.5s (7.5% of total time) in 75 GCs | Peak RSS: 8.87GB | CPU load: 7.95
 ------------------------------------------------------------------------------------------------------------------------
 Produced artifacts:
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/libpolyglot.dylib (shared_lib)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/libpolyglot.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/graal_isolate.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/polyglot_api.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/polyglot_isolate.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/libpolyglot_dynamic.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/graal_isolate_dynamic.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/polyglot_api_dynamic.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/polyglot_isolate_dynamic.h (header)
- /Users/nirvdrum/.sdkman/candidates/java/22.1.0.r17-grl/lib/polyglot/libpolyglot.build_artifacts.txt
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/graal_isolate.h (header)
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/graal_isolate_dynamic.h (header)
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/libpolyglot.build_artifacts.txt (txt)
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/libpolyglot.so (shared_lib)
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/polyglot_api.h (header)
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/polyglot_api_dynamic.h (header)
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/polyglot_isolate.h (header)
+ /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/lib/polyglot/polyglot_isolate_dynamic.h (header)
 ========================================================================================================================
-Finished generating 'libpolyglot' in 5m 17s.
+Finished generating 'libpolyglot' in 2m 5s.
 ```
 
 As a warning, building _libpolyglot_ is a computationally heavy process. It will take a long time and you may need to
