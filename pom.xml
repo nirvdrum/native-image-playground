@@ -18,6 +18,8 @@
         <native.maven.plugin.version>0.9.20</native.maven.plugin.version>
         <graalvm.version>22.3.1</graalvm.version>
         <sis.version>1.0</sis.version>
+        <native.image.debug>false</native.image.debug>
+        <native.image.verbose>false</native.image.verbose>
     </properties>
 
     <dependencies>
@@ -117,6 +119,8 @@
                         </executions>
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeImage</mainClass>
+                            <debug>${native.image.debug}</debug>
+                            <verbose>${native.image.verbose}</verbose>
                             <imageName>native-image-playground</imageName>
                         </configuration>
                     </plugin>
@@ -156,7 +160,9 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibrary</mainClass>
                             <imageName>lib${launcher.name}</imageName>
+                            <debug>${native.image.debug}</debug>
                             <sharedLibrary>true</sharedLibrary>
+                            <verbose>${native.image.verbose}</verbose>
                             <buildArgs>-H:+ParseRuntimeOptions</buildArgs>
                         </configuration>
                     </plugin>
@@ -223,7 +229,9 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
+                            <debug>${native.image.debug}</debug>
                             <sharedLibrary>true</sharedLibrary>
+                            <verbose>${native.image.verbose}</verbose>
                             <buildArgs>--language:ruby</buildArgs>
                         </configuration>
                     </plugin>
@@ -378,7 +386,9 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
+                            <debug>${native.image.debug}</debug>
                             <sharedLibrary>true</sharedLibrary>
+                            <verbose>${native.image.verbose}</verbose>
                             <buildArgs>--language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
                     </plugin>
@@ -485,7 +495,9 @@
                         <configuration>
                             <mainClass>com.nirvdrum.truffleruby.NativeLibraryRuby</mainClass>
                             <imageName>lib${launcher.name}</imageName>
+                            <debug>${native.image.debug}</debug>
                             <sharedLibrary>true</sharedLibrary>
+                            <verbose>${native.image.verbose}</verbose>
                             <buildArgs>--language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
                     </plugin>
