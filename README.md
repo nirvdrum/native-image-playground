@@ -125,7 +125,7 @@ in Rosetta.
 ## Building the Native Image Playground
 
 The project's Maven configuration is split into multiple profiles, allowing you to pick the type of image you would
-like. The list of profiles are:
+like. The list of profiles is:
 
     * native-image: A standalone executable written in Java
     * native-library: A shared library written in Java
@@ -136,10 +136,22 @@ like. The list of profiles are:
     * benchmark-setup: Fetches and builds the Google Benchmark library for running benchmarks
     * benchmark: Runs benchmarks comparing `@CEntryPoint` and JNI Invocation API calls
 
+Additionally, the project uses some configuration values that allow you to customize the Native Image invocation. They
+can be configured at invocation time via the `-D` flag to the `mvn` command. The list of properties is:
+
+    * native.image.debug: Build a native image with debug symbols (Boolean; default: false)
+    * native.image.verbose: Build a native image verbosely (Boolean; default: false)
+
 To build any of these profiles, you run:
 
 ```
 $ mvn -P <profile_name> -D skipTests=true clean package
+```
+
+To build a profile with verbose logging from Native Image, you run:
+
+```
+$ mvn -P <profile_name> -D skipTests=true -D native.image.verbose=true clean package
 ```
 
 Maven stores the compiled artifacts in the `target/` directory. The `clean` option in the build command will delete
