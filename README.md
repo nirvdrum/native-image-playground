@@ -23,8 +23,8 @@ In order to build this project you will need to have clang and clang++ installed
 and [Apache Maven](https://maven.apache.org/). Both GraalVM and Maven can be installed with [SDKMan!](https://sdkman.io/):
 
 ```
-$ sdk install java 22.3.1.r17-grl
-$ sdk use java 22.3.1.r17-grl
+$ sdk install java 23.0.1-graal
+$ sdk use java 23.0.1-graal
 $ sdk install maven
 ```
 
@@ -33,7 +33,7 @@ to the directory that contains the unpackaged distribution's `bin/` dir. On macO
 the `Contents/Home/` directory, leading to something like:
 
 ```
-export JAVA_HOME=$HOME/dev/bin/graalvm-ce-java17-22.3.1/Contents/Home/
+export JAVA_HOME=$HOME/dev/bin/graalvm-community-openjdk-23.0.1+11.1/Contents/Home/
 ```
 
 You can also manage the Maven installation on your own. Many popular package managers have a way of installing it.
@@ -41,59 +41,13 @@ You can also manage the Maven installation on your own. Many popular package man
 The rest of the documentation assumes that you have both the GraalVM `bin/` directory and Maven available on your
 `PATH`. If you do not, you will need to adjust commands accordingly to point at the correct binaries.
 
-The GraalVM distribution does not include _native-image_ out of the box. Instead, it provides a utility called the
-GraalVM Component Updater with which you can install _native-image_ and other GraalVM components. The utility is
-packaged as a binary called `gu`. To see which components are available for installation, you can run `gu available`:
+Newer distributions of GraalVM ship with the _native-image_ utility and have removed the older _gu_ tool that previous
+version of this program relied upon. Rather than using _gu_ to install Truffle language images, the languages are now
+available as JAR files on Maven Central. The Maven plugin for invoking _native-image_ will make any Truffle languages
+declared as dependencies available to the resulting image. If you're interested in seeing what the old setup looked
+like, please check out the _graalvm-22.3.1_ git tag.
 
-```
-$ gu available
-Downloading: Component catalog from www.graalvm.org
-ComponentId              Version             Component name                Stability                     Origin
----------------------------------------------------------------------------------------------------------------------------------
-espresso                 22.3.1              Java on Truffle               Supported                     github.com
-espresso-llvm            22.3.1              Java on Truffle LLVM Java librSupported                     github.com
-js                       22.3.1              Graal.js                      Supported                     github.com
-llvm                     22.3.1              LLVM Runtime Core             Supported                     github.com
-llvm-toolchain           22.3.1              LLVM.org toolchain            Supported                     github.com
-native-image             22.3.1              Native Image                  Early adopter                 github.com
-native-image-llvm-backend22.3.1              Native Image LLVM Backend     Early adopter (experimental)  github.com
-nodejs                   22.3.1              Graal.nodejs                  Supported                     github.com
-python                   22.3.1              GraalVM Python                Experimental                  github.com
-R                        22.3.1              FastR                         Experimental                  github.com
-ruby                     22.3.1              TruffleRuby                   Experimental                  github.com
-visualvm                 22.3.1              VisualVM                      Experimental                  github.com
-wasm                     22.3.1              GraalWasm                     Experimental                  github.com
-```
-
-This repository will require the _native-image_ and _ruby_ components.
-
-```
-$ gu install native-image ruby
-Downloading: Component catalog from www.graalvm.org
-Processing Component: Native Image
-Processing Component: TruffleRuby
-Processing Component: LLVM.org toolchain
-Processing Component: LLVM Runtime Core
-Additional Components are required:
-    LLVM.org toolchain (org.graalvm.llvm-toolchain, version 22.3.1), required by: TruffleRuby (org.graalvm.ruby)
-    LLVM Runtime Core (org.graalvm.llvm, version 22.3.1), required by: TruffleRuby (org.graalvm.ruby)
-Downloading: Component native-image: Native Image from github.com
-Downloading: Component ruby: TruffleRuby from github.com
-Downloading: Component org.graalvm.llvm-toolchain: LLVM.org toolchain from github.com
-Downloading: Component org.graalvm.llvm: LLVM Runtime Core from github.com
-Installing new component: LLVM Runtime Core (org.graalvm.llvm, version 22.3.1)
-Installing new component: LLVM.org toolchain (org.graalvm.llvm-toolchain, version 22.3.1)
-Installing new component: Native Image (org.graalvm.native-image, version 22.3.1)
-Installing new component: TruffleRuby (org.graalvm.ruby, version 22.3.1)
-
-IMPORTANT NOTE:
----------------
-The Ruby openssl C extension needs to be recompiled on your system to work with the installed libssl.
-First, make sure TruffleRuby's dependencies are installed, which are described at:
-  https://github.com/oracle/truffleruby/blob/master/README.md#dependencies
-Then run the following command:
-        /home/nirvdrum/.sdkman/candidates/java/22.3.1.r17-grl/languages/ruby/lib/truffle/post_install_hook.sh
-```
+XXXXXXXXXXXXX
 
 Please pay attention to the output. There are two things of note here. The first is that the TruffleRuby native image
 needs to recompile the OpenSSL extension for your machine. If you skip this step and try to use the _openssl_ gem in
