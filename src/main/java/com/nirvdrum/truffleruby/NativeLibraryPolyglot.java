@@ -13,7 +13,6 @@ public class NativeLibraryPolyglot {
     private static final ConcurrentHashMap<String, Value> parseCache = new ConcurrentHashMap<>();
     private static final Context context = Context.newBuilder()
             .allowExperimentalOptions(true)
-            .option("ruby.no-home-provided", "true")
             .build();
     private static Value function;
 
@@ -29,7 +28,6 @@ public class NativeLibraryPolyglot {
             double bLat, double bLong) {
         try (Context context = Context.newBuilder()
                 .allowExperimentalOptions(true)
-                .option("ruby.no-home-provided", "true")
                 .build()) {
             final String code = CTypeConversion.toJavaString(cCode);
             final String language = CTypeConversion.toJavaString(cLanguage);

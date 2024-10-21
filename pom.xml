@@ -13,10 +13,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <native.maven.plugin.version>0.9.20</native.maven.plugin.version>
-        <graalvm.version>22.3.1</graalvm.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <native.maven.plugin.version>0.10.3</native.maven.plugin.version>
+        <graalvm.version>24.1.1</graalvm.version>
         <sis.version>1.0</sis.version>
         <native.image.debug>false</native.image.debug>
         <native.image.verbose>false</native.image.verbose>
@@ -28,6 +28,26 @@
             <artifactId>graal-sdk</artifactId>
             <version>${graalvm.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>polyglot</artifactId>
+            <version>${graalvm.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>js</artifactId>
+            <version>${graalvm.version}</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>ruby</artifactId>
+            <version>${graalvm.version}</version>
+            <type>pom</type>
         </dependency>
 
         <dependency>
@@ -232,7 +252,6 @@
                             <debug>${native.image.debug}</debug>
                             <sharedLibrary>true</sharedLibrary>
                             <verbose>${native.image.verbose}</verbose>
-                            <buildArgs>--language:ruby</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -389,7 +408,7 @@
                             <debug>${native.image.debug}</debug>
                             <sharedLibrary>true</sharedLibrary>
                             <verbose>${native.image.verbose}</verbose>
-                            <buildArgs>--language:js --language:ruby -H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
+                            <buildArgs>-H:JNIConfigurationFiles=${project.build.sourceDirectory}/../resources/native-jni-config.json</buildArgs>
                         </configuration>
                     </plugin>
                     <plugin>

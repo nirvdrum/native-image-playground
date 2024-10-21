@@ -135,9 +135,6 @@ static void DoJNISetup(const benchmark::State& state) {
         env->CallStaticObjectMethod(contextClass, newBuilderMethod, emptyArgs);
     builder = env->CallObjectMethod(builder, allowExperimentalOptionsMethod,
                                     JNI_TRUE);
-    builder = env->CallObjectMethod(builder, optionMethod,
-                                    env->NewStringUTF("ruby.no-home-provided"),
-                                    env->NewStringUTF("true"));
     context = env->CallObjectMethod(builder, buildMethod);
   }
 }

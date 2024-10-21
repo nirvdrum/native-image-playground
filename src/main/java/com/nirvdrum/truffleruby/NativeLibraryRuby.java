@@ -8,7 +8,6 @@ import org.graalvm.polyglot.Value;
 public class NativeLibraryRuby {
     private static final Context context = Context.newBuilder()
             .allowExperimentalOptions(true)
-            .option("ruby.no-home-provided", "true")
             .build();
     private static final Value haversineDistance = context.eval("ruby", PolyglotScripts.getHaversineRuby());
 

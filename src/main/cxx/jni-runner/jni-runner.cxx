@@ -108,9 +108,6 @@ int main(int argc, char** argv) {
 
   builder =
       env->CallObjectMethod(builder, allowExperimentalOptionsMethod, JNI_TRUE);
-  builder = env->CallObjectMethod(builder, optionMethod,
-                                  env->NewStringUTF("ruby.no-home-provided"),
-                                  env->NewStringUTF("true"));
   jobject context = env->CallObjectMethod(builder, buildMethod);
 
   CHECK_EXCEPTION(env);
